@@ -1,0 +1,48 @@
+@startuml
+!theme mars
+hide empty description
+
+  [*] --> Carousel
+
+  state Carousel {
+    Clock: * Current time (in HH:mm format)
+    Clock: * Current date (in dd/mm/yyyy format)
+    Clock: * List of (active) valves
+
+    Valve1: * Valve ID
+    Valve1: * State (on/off)
+    Valve1: * Activation (auto/manual)
+    Valve1: * Timer (date and days)
+
+    ValveN: * Valve ID
+    ValveN: * State (on/off)
+    ValveN: * Activation (auto/manual)
+    ValveN: * Timer (date and days)
+
+    Clock --> Valve1 : "Next" button
+    Clock <-- Valve1 : "Prev" button
+    Valve1 -[dotted]-> ValveN
+    ValveN --> Clock
+  }
+
+  state ClockConfig {
+    Clock --> ClockConfig : "Enter" button
+    Clock --> ClockConfig : "Return" button
+    
+    TimerConfig --> ContrastConfig
+    ContrastConfig --> LedConfig
+    LedConfig --> TimerConfig
+  }
+
+  state ValveConfig {
+    Valve1 --> ValveConfig : "Enter" button
+    Valve1 <-- ValveConfig : "Return" button
+
+    State --> Activation : "Next" button
+    State <-- Activation : "Prev" button
+    Activation --> Timer
+    Timer --> Days
+    Days --> State
+  }
+
+@enduml

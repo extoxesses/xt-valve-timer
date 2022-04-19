@@ -1,0 +1,201 @@
+{
+  "uuid": "2cfb75c1d0f8a9378c5ee1657d9ecb5d",
+  "path": "Offline/xtValveTimer",
+  "name": "xtValveTimer",
+  "content": "",
+  "created_at": "2022-04-19 22:02:06",
+  "updated_at": "2022-04-19 22:02:07",
+  "stick": "",
+  "documents": [
+    {
+      "uuid": "ff493019da96264b605f067e3f35212a",
+      "title": "Sheet_1",
+      "description": "",
+      "docType": "1",
+      "master": "",
+      "thumb": "/images/thumb-default.png",
+      "components": {
+        "c08942fdcf114fe98840485a034d81bd": 1,
+        "3ec77201bbcd4ecd8722658d581a4e60": 1,
+        "65b1ae295679465fabfb76c1fc7cc7e6": 1,
+        "eaa76950fd7343a1953943ee7b9978d3": 1,
+        "b0248eb51e084227889f2cb84eab79c4": 16,
+        "976c361b8bd24f9f8d73347bde08a79c": 4
+      },
+      "BOM": [
+        [
+          "Value",
+          "Quantity",
+          "Package",
+          "Components",
+          "CustomPara"
+        ],
+        [
+          "IO_SUPPLY",
+          1,
+          "HDR-F-2.54_1X2",
+          "H1",
+          {
+            "BOM_Supplier Part": "C49661",
+            "BOM_Supplier": "LCSC",
+            "BOM_Manufacturer": "",
+            "BOM_Manufacturer Part": "",
+            "puuid": "36b1306a115341f4b4d9407fb34974e0",
+            "uuid": "3ec77201bbcd4ecd8722658d581a4e60"
+          }
+        ],
+        [
+          "IO_MONITOR",
+          1,
+          "HDR-F-2.54_1X5",
+          "H2",
+          {
+            "BOM_Supplier Part": "C50950",
+            "BOM_Supplier": "LCSC",
+            "BOM_Manufacturer": "",
+            "BOM_Manufacturer Part": "",
+            "puuid": "4bb67b2ac49a4595b3ed10b792fcbebb",
+            "uuid": "65b1ae295679465fabfb76c1fc7cc7e6"
+          }
+        ],
+        [
+          "IO_BUTTONS",
+          1,
+          "HDR-F-2.54_1X4",
+          "H3",
+          {
+            "BOM_Supplier Part": "C225501",
+            "BOM_Supplier": "LCSC",
+            "BOM_Manufacturer": "",
+            "BOM_Manufacturer Part": "",
+            "puuid": "21473b495b6340c992965357d5701779",
+            "uuid": "eaa76950fd7343a1953943ee7b9978d3"
+          }
+        ],
+        [
+          "2.2k",
+          2,
+          "R0603",
+          "R1,R11",
+          {
+            "BOM_Supplier Part": "",
+            "BOM_Supplier": "",
+            "BOM_Manufacturer Part": "",
+            "puuid": "398691f1f785460098bbe5ee6590333c",
+            "uuid": "b0248eb51e084227889f2cb84eab79c4"
+          }
+        ],
+        [
+          "1k",
+          8,
+          "R0603",
+          "R2,R3,R4,R5,R13,R14,R15,R16",
+          {
+            "BOM_Supplier Part": "",
+            "BOM_Supplier": "",
+            "BOM_Manufacturer Part": "",
+            "puuid": "398691f1f785460098bbe5ee6590333c",
+            "uuid": "b0248eb51e084227889f2cb84eab79c4"
+          }
+        ],
+        [
+          "3.3k",
+          6,
+          "R0603",
+          "R6,R7,R8,R9,R10,R12",
+          {
+            "BOM_Supplier Part": "",
+            "BOM_Supplier": "",
+            "BOM_Manufacturer Part": "",
+            "puuid": "398691f1f785460098bbe5ee6590333c",
+            "uuid": "b0248eb51e084227889f2cb84eab79c4"
+          }
+        ],
+        [
+          "JPM1",
+          1,
+          "SW-SMD_SMK_JPM1040-XXXXFC",
+          "SW1",
+          {
+            "BOM_Supplier": "LCSC",
+            "BOM_Supplier Part": "C516061",
+            "BOM_Manufacturer": "SMK",
+            "BOM_Manufacturer Part": "JPM1040-2013FC",
+            "BOM_JLCPCB Part Class": "Extended Part",
+            "puuid": "ec5770f62dd74a94bb2aed4de4053e48",
+            "uuid": "976c361b8bd24f9f8d73347bde08a79c"
+          }
+        ],
+        [
+          "JPM2",
+          1,
+          "SW-SMD_SMK_JPM1040-XXXXFC",
+          "SW2",
+          {
+            "BOM_Supplier": "LCSC",
+            "BOM_Supplier Part": "C516061",
+            "BOM_Manufacturer": "SMK",
+            "BOM_Manufacturer Part": "JPM1040-2013FC",
+            "BOM_JLCPCB Part Class": "Extended Part",
+            "puuid": "ec5770f62dd74a94bb2aed4de4053e48",
+            "uuid": "976c361b8bd24f9f8d73347bde08a79c"
+          }
+        ],
+        [
+          "JPM3",
+          1,
+          "SW-SMD_SMK_JPM1040-XXXXFC",
+          "SW3",
+          {
+            "BOM_Supplier": "LCSC",
+            "BOM_Supplier Part": "C516061",
+            "BOM_Manufacturer": "SMK",
+            "BOM_Manufacturer Part": "JPM1040-2013FC",
+            "BOM_JLCPCB Part Class": "Extended Part",
+            "puuid": "ec5770f62dd74a94bb2aed4de4053e48",
+            "uuid": "976c361b8bd24f9f8d73347bde08a79c"
+          }
+        ],
+        [
+          "JPM4",
+          1,
+          "SW-SMD_SMK_JPM1040-XXXXFC",
+          "SW4",
+          {
+            "BOM_Supplier": "LCSC",
+            "BOM_Supplier Part": "C516061",
+            "BOM_Manufacturer": "SMK",
+            "BOM_Manufacturer Part": "JPM1040-2013FC",
+            "BOM_JLCPCB Part Class": "Extended Part",
+            "puuid": "ec5770f62dd74a94bb2aed4de4053e48",
+            "uuid": "976c361b8bd24f9f8d73347bde08a79c"
+          }
+        ],
+        [
+          "PCD8544 NOKIA 5110",
+          1,
+          "PCD8544",
+          "U1",
+          {
+            "BOM_Manufacturer": "",
+            "BOM_Manufacturer Part": "",
+            "BOM_Supplier Part": "",
+            "BOM_Supplier": "",
+            "puuid": "ff130389eae347c0822dce2023a7a89e",
+            "uuid": "c08942fdcf114fe98840485a034d81bd"
+          }
+        ]
+      ],
+      "updateTime": 1650398527,
+      "createTime": 1650398527,
+      "histories": [],
+      "created_at": "2022-04-19 22:02:07",
+      "updated_at": "2022-04-19 22:02:07"
+    }
+  ],
+  "sort": [],
+  "title": "xtValveTimer",
+  "foldername": "xtValveTimer",
+  "schfilename": "xtValveTimer.json",
+  "schfilemtime": 1650398527139
+}
