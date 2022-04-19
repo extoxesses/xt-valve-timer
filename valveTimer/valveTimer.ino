@@ -22,6 +22,13 @@ const short RETURN_BTN_PIN = 19;
 const short NEXT_BTN_PIN = 20;
 const short PREV_BTN_PIN = 21;
 
+const short DEBUG_PIN = 23;
+
+const short RELAY_1 = 30;
+const short RELAY_2 = 31;
+const short RELAY_3 = 32;
+const short RELAY_4 = 33;
+
 // === Properties ===
 
 // System
@@ -56,9 +63,9 @@ const StateFunction valveConfig[] = {};
 
 const StateFunction* stateMachine[stateMachineSize] = {carousel, systemConfig, valveConfig};
 
-short smIdxX = 0;
-short smIdxY = 0;
-bool refresh = false;
+short smIdxX;
+short smIdxY;
+bool refresh;
 
 // --- State machine ---
 // TODO: Check "bounce" issue
@@ -100,25 +107,39 @@ void initDisplay() {
 }
 
 void initInterrupts() {
-  attachInterrupt(digitalPinToInterrupt(ENTER_BTN_PIN),  onEnterRise,  FALLING);
-  attachInterrupt(digitalPinToInterrupt(RETURN_BTN_PIN), onReturnRise, FALLING);
-  attachInterrupt(digitalPinToInterrupt(PREV_BTN_PIN),   onPrevRise,   FALLING);
-  attachInterrupt(digitalPinToInterrupt(NEXT_BTN_PIN),   onNextRise,   FALLING);
+  short mode = FALLING;
+  attachInterrupt(digitalPinToInterrupt(ENTER_BTN_PIN),  onEnterRise,  mode);
+  attachInterrupt(digitalPinToInterrupt(RETURN_BTN_PIN), onReturnRise, mode);
+  attachInterrupt(digitalPinToInterrupt(PREV_BTN_PIN),   onPrevRise,   mode);
+  attachInterrupt(digitalPinToInterrupt(NEXT_BTN_PIN),   onNextRise,   mode);
+}
+
+void initGPIO() {
+  // Debug
+  pinMode(DEBUG_PIN, INPUT);
+  // Relay
+  pinMode(RELAY_1, OUTPUT);
+  pinMode(RELAY_2, OUTPUT);
+  pinMode(RELAY_3, OUTPUT);
+  pinMode(RELAY_4, OUTPUT);
+  // RTC
+  //pinMode(DEBUG_PIN, INPUT);
+  //pinMode(DEBUG_PIN, INPUT);
+  //pinMode(DEBUG_PIN, INPUT);
+  //pinMode(DEBUG_PIN, INPUT);
 }
 
 // --- Display subroutines
 
 void refreshAndLog() {
-  Serial.print("State: [");
-  Serial.print(smIdxX);
-  Serial.print(",");
-  Serial.print(smIdxY);
-  Serial.println("]");
+  if (HIGH == digitalRead(DEBUG_PIN)) {
+    String msg = "SM: [" + String(smIdxX) + "," + String(smIdxY) + "]";
+    Serial.println(msg);
+  }
 
   display.clearDisplay();
   delay(250);
   display.display();
-  //interrupts();
 }
 
 void displayClock() {
@@ -182,12 +203,16 @@ void displayValve() {
 // --- Arduino routines ---
 
 void setup() {
-  Serial.begin(9600); // TODO: make dinamic, as using a checking pin
-  
-  // Init display with default configurations
+  // Init peripherals and GPIO pins
+  Serial.begin(9600);
   initDisplay();
-  // Init interrupts
   initInterrupts();
+  initGPIO();
+  
+  // Init state machine and system inital state
+  smIdxX = 0;
+  smIdxY = 0;
+  refresh = false;
 
   // Wait system to be stable, and run with start configuration
   delay(1000);
@@ -195,6 +220,7 @@ void setup() {
 }
 
 void loop() {
+  // State machine and monitor update
   if (refresh) {
     refresh = false;
     refreshAndLog();
