@@ -54,6 +54,7 @@ Adafruit_PCD8544 display = Adafruit_PCD8544(D_SCK, D_SDIN, D_DC, D_SCE, D_RES);
 */
 typedef void (*StateFunction)();
 
+/* --------------------------------------------------------------------------------
 const short stateMachineSize = 3;
 const short componentsSize[stateMachineSize] = {5, 0, 0};
 
@@ -62,10 +63,24 @@ const StateFunction systemConfig[] = {};
 const StateFunction valveConfig[] = {};
 
 const StateFunction* stateMachine[stateMachineSize] = {carousel, systemConfig, valveConfig};
+// -------------------------------------------------------------------------------- */
 
 short smIdxX;
 short smIdxY;
 bool refresh;
+
+const short SYSTEM_CFG_SIZE = 1; // TODO
+const short VALVE_CFG_SIZE = 1; // TODO
+
+StateFunction SYSTEM_CFG[SYSTEM_CFG_SIZE] = {&displayClock};
+StateFunction VALVE_CFG[VALVE_CFG_SIZE] = {&displayValve};
+
+const short stateMachineSize = 1 + MAX_VALVES; // TODO: to remove
+short componentsSize[1 + MAX_VALVES];
+StateFunction* stateMachine[1 + MAX_VALVES];
+
+
+// --------------------------------------------------------------------------------
 
 // --- State machine ---
 // TODO: Check "bounce" issue
@@ -106,14 +121,6 @@ void initDisplay() {
   display.clearDisplay();
 }
 
-void initInterrupts() {
-  short mode = FALLING;
-  attachInterrupt(digitalPinToInterrupt(ENTER_BTN_PIN),  onEnterRise,  mode);
-  attachInterrupt(digitalPinToInterrupt(RETURN_BTN_PIN), onReturnRise, mode);
-  attachInterrupt(digitalPinToInterrupt(PREV_BTN_PIN),   onPrevRise,   mode);
-  attachInterrupt(digitalPinToInterrupt(NEXT_BTN_PIN),   onNextRise,   mode);
-}
-
 void initGPIO() {
   // Debug
   pinMode(DEBUG_PIN, INPUT);
@@ -123,10 +130,29 @@ void initGPIO() {
   pinMode(RELAY_3, OUTPUT);
   pinMode(RELAY_4, OUTPUT);
   // RTC
-  //pinMode(DEBUG_PIN, INPUT);
-  //pinMode(DEBUG_PIN, INPUT);
-  //pinMode(DEBUG_PIN, INPUT);
-  //pinMode(DEBUG_PIN, INPUT);
+  //pinMode(DEBUG_PIN, OUTPUT);
+  //pinMode(DEBUG_PIN, OUTPUT);
+  //pinMode(DEBUG_PIN, OUTPUT);
+  //pinMode(DEBUG_PIN, OUTPUT);
+  // Interrupts
+  short mode = FALLING;
+  attachInterrupt(digitalPinToInterrupt(ENTER_BTN_PIN),  onEnterRise,  mode);
+  attachInterrupt(digitalPinToInterrupt(RETURN_BTN_PIN), onReturnRise, mode);
+  attachInterrupt(digitalPinToInterrupt(PREV_BTN_PIN),   onPrevRise,   mode);
+  attachInterrupt(digitalPinToInterrupt(NEXT_BTN_PIN),   onNextRise,   mode);
+}
+
+void initStateMachine() {
+  stateMachine[0] = SYSTEM_CFG;
+  componentsSize[0] = SYSTEM_CFG_SIZE;
+  for(int i = 1; i < (1 + MAX_VALVES); ++i) {
+    componentsSize[i] = VALVE_CFG_SIZE;
+    stateMachine[i] = VALVE_CFG;
+  }
+  
+  smIdxX = 0;
+  smIdxY = 0;
+  refresh = false;
 }
 
 // --- Display subroutines
@@ -181,7 +207,7 @@ void displayValve() {
   display.setTextColor(BLACK);
   display.setTextSize(2);
   display.print("Valve ");
-  display.println(smIdxY);
+  display.println(smIdxX);
   
   display.setTextSize(1);
 
@@ -206,13 +232,10 @@ void setup() {
   // Init peripherals and GPIO pins
   Serial.begin(9600);
   initDisplay();
-  initInterrupts();
   initGPIO();
   
   // Init state machine and system inital state
-  smIdxX = 0;
-  smIdxY = 0;
-  refresh = false;
+  initStateMachine();
 
   // Wait system to be stable, and run with start configuration
   delay(1000);
