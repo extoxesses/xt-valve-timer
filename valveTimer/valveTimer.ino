@@ -5,7 +5,6 @@
 #include <ThreeWire.h>
 #include <RtcDS1302.h>
 
-
 // === Constants Section ===
 
 // System
@@ -65,30 +64,13 @@ RtcDS1302<ThreeWire> RTC(RTC_WIRE);
 */
 typedef void (*StateFunction)();
 
-/* --------------------------------------------------------------------------------
-  const short stateMachineSize = 3;
-  const short componentsSize[stateMachineSize] = {5, 0, 0};
-
-  const StateFunction carousel[] = {&DISPLAYClock, &DISPLAYValve, &Valve, &displayValve, &displayValve};
-  const StateFunction systemConfig[] = {};
-  const StateFunction valveConfig[] = {};
-
-  const StateFunction* stateMachine[stateMachineSize] = {carousel, systemConfig, valveConfig};
-  // -------------------------------------------------------------------------------- */
+const StateFunction SYSTEM_CFG[1] = {&landingScreen};
+const StateFunction VALVE_CFG[1] = {&displayValve};
+const StateFunction* stateMachine[1 + MAX_VALVES] = {SYSTEM_CFG, VALVE_CFG, VALVE_CFG, VALVE_CFG, VALVE_CFG};
 
 short smIdxX;
 short smIdxY;
 bool refresh;
-
-const short SYSTEM_CFG_SIZE = 1; // TODO
-const short VALVE_CFG_SIZE = 1; // TODO
-
-StateFunction SYSTEM_CFG[SYSTEM_CFG_SIZE] = {&landingScreen};
-StateFunction VALVE_CFG[VALVE_CFG_SIZE] = {}; // {&displayValve};
-
-const short stateMachineSize = 1 + MAX_VALVES; // TODO: to remove
-short componentsSize[1 + MAX_VALVES];
-StateFunction* stateMachine[1 + MAX_VALVES];
 
 void landingScreen() {
   RtcDateTime now = RTC.GetDateTime();
@@ -110,7 +92,6 @@ void landingScreen() {
 
   short startPos = 43;
   for (short i = 0; i < MAX_VALVES; ++i) {
-
     LCD.setCursor(startPos, 35);
     LCD.setTextSize(1);
     if (valves[i].active) {
@@ -158,28 +139,29 @@ void displayValve() {
 
 void onEnterRise() {
   if (!refresh) {
-    smIdxX = ++smIdxX % stateMachineSize;
+    smIdxX = ++smIdxX % (1 + MAX_VALVES);
     refresh = true;
   }
 }
 
 void onReturnRise() {
   if (!refresh) {
-    smIdxX = (stateMachineSize + smIdxX - 1) % stateMachineSize;
+    smIdxX = (1 + MAX_VALVES + smIdxX - 1) % (1 + MAX_VALVES);
     refresh = true;
   }
 }
 
 void onNextRise() {
   if (!refresh) {
-    smIdxY = ++smIdxY % componentsSize[smIdxX];
+    smIdxY = ++smIdxY % 1; // TOD: componentsSize[smIdxX];
     refresh = true;
   }
 }
 
 void onPrevRise() {
   if (!refresh) {
-    smIdxY = (componentsSize[smIdxX] + smIdxY - 1) % componentsSize[smIdxX];
+    // smIdxY = (componentsSize[smIdxX] + smIdxY - 1) % componentsSize[smIdxX];
+    smIdxY = (1 + smIdxY - 1) % 1;
     refresh = true;
   }
 }
@@ -209,12 +191,18 @@ void initGPIO() {
 }
 
 void initStateMachine() {
-  stateMachine[0] = SYSTEM_CFG;
-  componentsSize[0] = SYSTEM_CFG_SIZE;
-  for (int i = 1; i < (1 + MAX_VALVES); ++i) {
-    componentsSize[i] = VALVE_CFG_SIZE;
-    stateMachine[i] = VALVE_CFG;
-  }
+  //  stateMachine[0] = SYSTEM_CFG;
+  //  componentsSize[0] = SYSTEM_CFG_SIZE;
+  //  for (int i = 1; i < (1 + MAX_VALVES); ++i) {
+  //    componentsSize[i] = VALVE_CFG_SIZE;
+  //    stateMachine[i] = VALVE_CFG;
+  //  }
+
+//  //carousel = new StateFunction[1 + MAX_VALVES];
+//  //carousel[0] = SYSTEM_CFG;
+//  for (short i = 1; i <= MAX_VALVES; ++i) {
+//    carousel[i] = VALVE_CFG;
+//  }
 
   smIdxX = 0;
   smIdxY = 0;
@@ -274,18 +262,13 @@ void setup() {
 
   // Wait system to be stable, and run with start configuration
   delay(1000);
-  stateMachine[smIdxX][smIdxY]();
+  //stateMachine[smIdxX][smIdxY]();
+  String msg = "Setup completed";
+  info(&msg[0]);
 }
 
 void loop() {
-  // State machine and monitor update
-  // if (refresh) {
-
-  //    stateMachine[smIdxX][smIdxY]();
-  landingScreen();
+  stateMachine[smIdxX][smIdxY]();
   refreshAndLog(250); // TODO: review delay. Shoud be a second divider
-  // delay(100);
   refresh = false;
-
-  // }
 }
