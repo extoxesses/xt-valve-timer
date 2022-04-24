@@ -2,20 +2,26 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_PCD8544.h>
 #include <avr/pgmspace.h>
+#include <ThreeWire.h>
+#include <RtcDS1302.h>
 
 
-// === Constants ===
+// === Constants Section ===
 
 // System
 const short MAX_VALVES = 4;
 const short WEEK_SIZE = 7;
 
-// GPIO pins 
+// GPIO pins
 const short D_RES  = 3;
 const short D_SCE  = 4;
 const short D_DC   = 5;
 const short D_SDIN = 6;
 const short D_SCK  = 7;
+
+const short RTC_DAT = 9;
+const short RTC_CLK = 8;
+const short RTC_RST = 10;
 
 const short ENTER_BTN_PIN = 18;
 const short RETURN_BTN_PIN = 19;
@@ -29,41 +35,46 @@ const short RELAY_2 = 31;
 const short RELAY_3 = 32;
 const short RELAY_4 = 33;
 
-// === Properties ===
 
-// System
+// === System properties and configurations ===
+
 typedef struct {
   bool active = false;
   bool manual = false;
   long timer = 0;
-  bool days[WEEK_SIZE] = {false,false,false,false,false,false,false};
+  bool days[WEEK_SIZE] = {false, false, false, false, false, false, false};
 } Valve;
 Valve valves[MAX_VALVES];
 
-// Display
+// DISPLAY configuration
 unsigned short contrast = 50;
-Adafruit_PCD8544 display = Adafruit_PCD8544(D_SCK, D_SDIN, D_DC, D_SCE, D_RES);
+Adafruit_PCD8544 LCD(D_SCK, D_SDIN, D_DC, D_SCE, D_RES);
+
+// RCT configuration
+ThreeWire RTC_WIRE(RTC_DAT, RTC_CLK, RTC_RST);
+RtcDS1302<ThreeWire> RTC(RTC_WIRE);
+
 
 // === State machine configurations ===
 
 /*
- * To simplify the state management, each "state function" has to implement an "main-like interface".
- * So, a "state function" has to expose two arguments:
- * - int argc
- * - char *argv[]
+   To simplify the state management, each "state function" has to implement an "main-like interface".
+   So, a "state function" has to expose two arguments:
+   - int argc
+   - char *argv[]
 */
 typedef void (*StateFunction)();
 
 /* --------------------------------------------------------------------------------
-const short stateMachineSize = 3;
-const short componentsSize[stateMachineSize] = {5, 0, 0};
+  const short stateMachineSize = 3;
+  const short componentsSize[stateMachineSize] = {5, 0, 0};
 
-const StateFunction carousel[] = {&displayClock, &displayValve, &displayValve, &displayValve, &displayValve};
-const StateFunction systemConfig[] = {};
-const StateFunction valveConfig[] = {};
+  const StateFunction carousel[] = {&DISPLAYClock, &DISPLAYValve, &Valve, &displayValve, &displayValve};
+  const StateFunction systemConfig[] = {};
+  const StateFunction valveConfig[] = {};
 
-const StateFunction* stateMachine[stateMachineSize] = {carousel, systemConfig, valveConfig};
-// -------------------------------------------------------------------------------- */
+  const StateFunction* stateMachine[stateMachineSize] = {carousel, systemConfig, valveConfig};
+  // -------------------------------------------------------------------------------- */
 
 short smIdxX;
 short smIdxY;
@@ -72,13 +83,73 @@ bool refresh;
 const short SYSTEM_CFG_SIZE = 1; // TODO
 const short VALVE_CFG_SIZE = 1; // TODO
 
-StateFunction SYSTEM_CFG[SYSTEM_CFG_SIZE] = {&displayClock};
-StateFunction VALVE_CFG[VALVE_CFG_SIZE] = {&displayValve};
+StateFunction SYSTEM_CFG[SYSTEM_CFG_SIZE] = {&landingScreen};
+StateFunction VALVE_CFG[VALVE_CFG_SIZE] = {}; // {&displayValve};
 
 const short stateMachineSize = 1 + MAX_VALVES; // TODO: to remove
 short componentsSize[1 + MAX_VALVES];
 StateFunction* stateMachine[1 + MAX_VALVES];
 
+void landingScreen() {
+  RtcDateTime now = RTC.GetDateTime();
+  LCD.setTextColor(BLACK);
+
+  LCD.setCursor(13, 5);
+  LCD.setTextSize(2);
+  char* timeString = formatTime(now);
+  LCD.println(timeString);
+
+  LCD.setCursor(13, 22);
+  LCD.setTextSize(1);
+  char* dateString = formatDate(now);
+  LCD.print(dateString);
+
+  LCD.setCursor(3, 35);
+  LCD.setTextSize(1);
+  LCD.print("Valve:");
+
+  short startPos = 43;
+  for (short i = 0; i < MAX_VALVES; ++i) {
+
+    LCD.setCursor(startPos, 35);
+    LCD.setTextSize(1);
+    if (valves[i].active) {
+      LCD.setTextColor(WHITE, BLACK);
+      LCD.drawRect(startPos - 1, 34, 7, 9, BLACK);
+    }
+
+    LCD.print(i + 1);
+    LCD.setTextColor(BLACK);
+    startPos += 10;
+  }
+
+  LCD.display();
+  delete timeString;
+  delete dateString;
+}
+
+void displayValve() {
+  LCD.setTextColor(BLACK);
+  LCD.setTextSize(2);
+  LCD.print("Valve ");
+  LCD.println(smIdxX);
+
+  LCD.setTextSize(1);
+
+  LCD.print("Active: ");
+  LCD.println(false);
+
+  LCD.print("Manual: ");
+  LCD.println(false);
+
+  LCD.print("Timer:  ");
+  LCD.println("18:00");
+
+  LCD.print("Days:   ");
+  LCD.println("1,3,5");
+
+  LCD.display();
+}
 
 // --------------------------------------------------------------------------------
 
@@ -92,7 +163,7 @@ void onEnterRise() {
   }
 }
 
-void onReturnRise() { 
+void onReturnRise() {
   if (!refresh) {
     smIdxX = (stateMachineSize + smIdxX - 1) % stateMachineSize;
     refresh = true;
@@ -116,9 +187,9 @@ void onPrevRise() {
 // --- Init functions ---
 
 void initDisplay() {
-  display.begin();
-  display.setContrast(contrast);
-  display.clearDisplay();
+  LCD.begin();
+  LCD.setContrast(contrast);
+  LCD.clearDisplay();
 }
 
 void initGPIO() {
@@ -129,11 +200,6 @@ void initGPIO() {
   pinMode(RELAY_2, OUTPUT);
   pinMode(RELAY_3, OUTPUT);
   pinMode(RELAY_4, OUTPUT);
-  // RTC
-  //pinMode(DEBUG_PIN, OUTPUT);
-  //pinMode(DEBUG_PIN, OUTPUT);
-  //pinMode(DEBUG_PIN, OUTPUT);
-  //pinMode(DEBUG_PIN, OUTPUT);
   // Interrupts
   short mode = FALLING;
   attachInterrupt(digitalPinToInterrupt(ENTER_BTN_PIN),  onEnterRise,  mode);
@@ -145,86 +211,55 @@ void initGPIO() {
 void initStateMachine() {
   stateMachine[0] = SYSTEM_CFG;
   componentsSize[0] = SYSTEM_CFG_SIZE;
-  for(int i = 1; i < (1 + MAX_VALVES); ++i) {
+  for (int i = 1; i < (1 + MAX_VALVES); ++i) {
     componentsSize[i] = VALVE_CFG_SIZE;
     stateMachine[i] = VALVE_CFG;
   }
-  
+
   smIdxX = 0;
   smIdxY = 0;
   refresh = false;
 }
 
-// --- Display subroutines
 
-void refreshAndLog() {
+// --- Utils ---
+
+char* formatDate(const RtcDateTime now) {
+  short arrSize = 11;
+  char* dateString = new char[arrSize];
+  short stringSize = arrSize * 8; // char sizeOf
+
+  snprintf_P(dateString, stringSize, PSTR("%02u/%02u/%04u"),
+             now.Day(), now.Month(), now.Year());
+  return dateString;
+}
+
+char* formatTime(const RtcDateTime now) {
+  short arrSize = 6;
+  char* dateString = new char[arrSize];
+  short stringSize = arrSize * 8; // char sizeOf
+
+  char separator = (now.Second() % 2 == 0) ? ':' : ' ';
+  snprintf_P(dateString, stringSize, PSTR("%02u%01c%02u"),
+             now.Hour(), separator, now.Minute());
+  return dateString;
+}
+
+void refreshAndLog(short delayMillis) {
+  String msg = "SM: [" + String(smIdxX) + "," + String(smIdxY) + "]";
+  info(&msg[0]);
+
+  LCD.clearDisplay();
+  delay(delayMillis);
+  LCD.display();
+}
+
+void info(char* message) {
   if (HIGH == digitalRead(DEBUG_PIN)) {
-    String msg = "SM: [" + String(smIdxX) + "," + String(smIdxY) + "]";
-    Serial.println(msg);
+    Serial.println(message);
   }
-
-  display.clearDisplay();
-  delay(250);
-  display.display();
 }
 
-void displayClock() {
-  display.setTextColor(BLACK);
-  
-  display.setCursor(13,5);
-  display.setTextSize(2);
-  display.println("12:01");
-  
-  display.setCursor(13,22);
-  display.setTextSize(1);
-  display.print("02/03/2022");
-
-  display.setCursor(3, 35);
-  display.setTextSize(1);
-  display.print("Valve:");
-
-  /*
-  short start = 33;
-  for (short i = 0; i < pumps; ++i) {
-    start = start + 10;
-    // display.drawLine(start, 30, start + 5, 30, BLACK);
-
-    if (i == 2) {
-      display.setTextColor(WHITE,BLACK);
-      display.drawRect(start - 1, 34, 7, 9, BLACK);
-    }
-    display.setCursor(start, 35);
-    display.setTextSize(1);
-    display.print(i + 1);
-    
-    display.setTextColor(BLACK);
-  }*/
-  
-  display.display();
-}
-
-void displayValve() {
-  display.setTextColor(BLACK);
-  display.setTextSize(2);
-  display.print("Valve ");
-  display.println(smIdxX);
-  
-  display.setTextSize(1);
-
-  display.print("Active: ");
-  display.println(false);
-  
-  display.print("Manual: ");
-  display.println(false);
-  
-  display.print("Timer:  ");
-  display.println("18:00");
-  
-  display.print("Days:   ");
-  display.println("1,3,5");
-  
-  display.display();
-}
 
 // --- Arduino routines ---
 
@@ -233,7 +268,7 @@ void setup() {
   Serial.begin(9600);
   initDisplay();
   initGPIO();
-  
+
   // Init state machine and system inital state
   initStateMachine();
 
@@ -244,9 +279,13 @@ void setup() {
 
 void loop() {
   // State machine and monitor update
-  if (refresh) {
-    refresh = false;
-    refreshAndLog();
-    stateMachine[smIdxX][smIdxY]();
-  }
+  // if (refresh) {
+
+  //    stateMachine[smIdxX][smIdxY]();
+  landingScreen();
+  refreshAndLog(250); // TODO: review delay. Shoud be a second divider
+  // delay(100);
+  refresh = false;
+
+  // }
 }
