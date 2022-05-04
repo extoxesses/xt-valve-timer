@@ -19,17 +19,21 @@ char* formatTime(const RtcDateTime* now) {
   return dateString;
 }
 
+const char* parseBoolean(bool value) {
+  return value ? "true" : "false";
+}
+
 void refreshAndLog(Adafruit_PCD8544* lcd, short delayMillis) {
-  String msg = "SM: [" + String(smIdxX) + "," + String(smIdxY) + "]";
-  info(&msg[0]);
+  //String msg = "State machine status: {" + String(navPtr[0]) + "," + String(smIdxY) + "]";
+  //info(&msg);
 
   lcd->clearDisplay();
   delay(delayMillis);
   lcd->display();
 }
 
-void info(char* message) {
+void info(String* message) {
   if (HIGH == digitalRead(DEBUG_PIN)) {
-    Serial.println(message);
+    Serial.println(*message);
   }
 }

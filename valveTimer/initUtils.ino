@@ -32,9 +32,7 @@ void initStateMachine(StateFunction*** stateMachine, short** stateMachineSize, s
       (*stateMachineSize)[i] = VALVE_CFG_SIZE;
   }
 
-  smIdxX = 0;
-  smIdxY = 0;
-  refresh = false;
+  refresh = true;
 }
 
 void initRTC(RtcDS1302<ThreeWire>* rtc) {
