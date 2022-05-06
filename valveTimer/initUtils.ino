@@ -37,6 +37,7 @@ void initStateMachine(StateFunction*** stateMachine, short** stateMachineSize, s
 
 void initRTC(RtcDS1302<ThreeWire>* rtc) {
   RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
+  Serial.println(__TIME__);
   rtc->SetDateTime(compiled);
   rtc->SetIsWriteProtected(false);
   rtc->SetIsRunning(true);

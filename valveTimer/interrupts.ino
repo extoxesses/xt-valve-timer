@@ -1,39 +1,55 @@
 void onEnterRise() {
-  if (!refresh) {
-    IDX = min(IDX+1, 3);
+  if (refresh) {
+     return;
+  } else if (IDX != 2) {
+    IDX++;
+    NAV_PTR[2] = 0;
     setSubmenuStatus();
-    refresh = true;
+  } else {
+    NAV_PTR[IDX]++;
   }
+  refresh = true;
 }
 
 void onReturnRise() {
-  if (!refresh) {
-    IDX = max(IDX-1, 0);
-    setSubmenuStatus();
-    refresh = true;
+  if (refresh) {
+     return;
   }
+  IDX = max(IDX - 1, 0);
+  setSubmenuStatus();
+  refresh = true;
 }
 
 void onNextRise() {
-  if (!refresh) {
+  if (refresh) {
+    return;
+  } else if (IDX < 2) {
     NAV_PTR[IDX] = ++NAV_PTR[IDX] % getSize();
     if ((IDX != 0) && (0 == NAV_PTR[IDX])) {
       // If ciclying on menus, skip "landing" screen
       onNextRise();
     }
-    refresh = true;
+  } else {
+    stateMachine[NAV_PTR[0]][NAV_PTR[1]](LCD, valves[NAV_PTR[0]], 1);
   }
+
+  refresh = true;
 }
 
 void onPrevRise() {
-  if (!refresh) {
+  if (refresh) {
+    return;
+  } else if (IDX < 2) {
     NAV_PTR[IDX] = (getSize() + --NAV_PTR[IDX]) % getSize();
     if ((IDX != 0) && (0 == NAV_PTR[IDX])) {
       // If ciclying on menus, skip "landing" screen
       onPrevRise();
     }
-    refresh = true;
+  } else {
+    stateMachine[NAV_PTR[0]][NAV_PTR[1]](LCD, valves[NAV_PTR[0]], -1);
   }
+
+  refresh = true;
 }
 
 // -- Utilities functions --

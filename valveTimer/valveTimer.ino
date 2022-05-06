@@ -29,15 +29,15 @@ RtcDS1302<ThreeWire> RTC(RTC_WIRE);
 
 // === State machine configurations ===
 
-typedef void (*StateFunction)();
-typedef void (CallbackFunction)(Adafruit_PCD8544*, Valve*, float);
+typedef void (*StateFunction)(Adafruit_PCD8544&, Valve&, short);
+typedef void (CallbackFunction)(Adafruit_PCD8544&, Valve&);
 
 const short SYSTEM_CFG_SIZE = 4;
 const short VALVE_CFG_SIZE = 5;
 short* stateMachineSize;
 
 StateFunction SYSTEM_CFG[SYSTEM_CFG_SIZE] = {&landingScreen, &settingsClockCallback, &settingsCalendarCallback, &settingsContrastCallback};
-StateFunction VALVE_CFG[VALVE_CFG_SIZE] = {&displayValve, &valveManualCallback, &valveActiveCallback, &valveTimerCallback, &valveDaysCallback};
+StateFunction VALVE_CFG[VALVE_CFG_SIZE] = {&displayValveCallback, &valveManualCallback, &valveActiveCallback, &valveTimerCallback, &valveDaysCallback};
 StateFunction** stateMachine;
 
 short IDX = 0;
@@ -68,9 +68,11 @@ void setup() {
 }
 
 void loop() {
-  stateMachine[NAV_PTR[0]][NAV_PTR[1]]();
-  if (refresh) {
-    refreshAndLog(&LCD, 250);
+  if(refresh) {
+    LCD.clearDisplay();
+    stateMachine[NAV_PTR[0]][NAV_PTR[1]](LCD, valves[NAV_PTR[0]], 0);
+    delay(250);
+    LCD.display();
     refresh = false;
   }
 }

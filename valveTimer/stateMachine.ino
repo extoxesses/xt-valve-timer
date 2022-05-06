@@ -1,22 +1,6 @@
-// --- Timer section utilities ---------------------------
-
-void commonsSettingsCallback(char* title, char* value) {
-  LCD.setTextColor(BLACK);
-  LCD.setTextSize(2);
-  LCD.println(title);
-
-  bar(&LCD, false);
-  LCD.println(" Set: ");
-  LCD.print("   ");
-  LCD.println(value);
-  bar(&LCD, true);
-  
-  LCD.display();
-}
-
 // --- Timer section callbacks ---------------------------
 
-void landingScreen() {
+void landingScreen(Adafruit_PCD8544& lcd, Valve& v, short op) {
   RtcDateTime now = RTC.GetDateTime();
   LCD.setTextColor(BLACK);
 
@@ -51,128 +35,210 @@ void landingScreen() {
   }
 
   // Display and flush
-  LCD.display();
   delete timeString;
   delete dateString;
 }
 
-void settingsClockCallback() {
+void settingsClockCallback(Adafruit_PCD8544& lcd, Valve& v, short op) {
   RtcDateTime now = RTC.GetDateTime();
-  char* timeString = formatTime(&now);
-  commonsSettingsCallback("Clock", timeString);
+  if (0 == op) {
+    char* timeString = formatTime(&now);
+    commonsSettingsCallback("Clock", timeString);
+  } else {
+    // 00:16:38
+
+//    short minute = now.Minute();
+//    if (minute == 60) {
+//      minute = 0;
+//      now._Hour((now.Hour() + 1) % 24);
+//    } else if (minute < 0) {
+//      minute = 59;
+//      now._hour((24 + now.Hour() - 1) % 24);
+//    } else {
+//      now.Minute(minute);
+//    }
+  }
 }
 
-void settingsCalendarCallback() {
+void settingsCalendarCallback(Adafruit_PCD8544& lcd, Valve& v, short op) {
   RtcDateTime now = RTC.GetDateTime();
   char* dateString = formatDate(&now);
   commonsSettingsCallback("Date", dateString);
 }
 
-void settingsContrastCallback() {
-  RtcDateTime now = RTC.GetDateTime();
-  char* dateString = formatDate(&now);
-  commonsSettingsCallback("Contra.", &String(contrast)[0]);
+void settingsContrastCallback(Adafruit_PCD8544& lcd, Valve& v, short op) {
+  if (0 == op) {
+    commonsSettingsCallback("Contra.", &String(contrast)[0]);
+  } else {
+    contrast = contrast + op;
+  }
 }
 
-// --- Valve section utilities ---------------------------
+// --- Valve section callbacks ---------------------------
 
+/*
+ * Displays the valve status in carousel's workflow
+ * 
+ * @param lcd   Display reference
+ * @param valve Reference valve
+ * @param inc   Incremental value to update valve state
+ */
+void displayValveCallback(Adafruit_PCD8544& lcd, Valve& valve, short inc) {
+  lcd.setTextColor(BLACK);
+  getValveHeader(lcd, NAV_PTR[0]);
+  
+  lcd.setTextSize(1);
+  drawValveManualValue(lcd, valve);
+  valveActive(lcd, valve);
+  valveTimer (lcd, valve);
+  valveDays  (lcd, valve);
+}
+
+/*
+ * Displays the valve manual value in valve settings' workflow
+ * 
+ * @param lcd   Display reference
+ * @param valve Reference valve
+ * @param inc   Incremental value to update valve state
+ */
+void valveManualCallback(Adafruit_PCD8544& lcd, Valve& valve, short inc) {
+  if(inc != 0) {
+    valve.manual = !valve.manual;
+    valve.active = false;
+  } else {
+    drawValveProperties(lcd, valve, *drawValveManualValue);
+  }
+}
+
+/*
+ * Displays the valve active value in valve settings' workflow
+ * 
+ * @param lcd   Display reference
+ * @param valve Reference valve
+ * @param inc   Incremental value to update valve state
+ */
+void valveActiveCallback(Adafruit_PCD8544& lcd, Valve& valve, short inc) {
+  if((inc != 0) && valve.manual) {
+    valve.active = !valve.active;
+  } else {
+    drawValveProperties(lcd, valve, *valveActive);
+  }
+}
+
+/*
+ * Displays the valve timer value in valve settings' workflow
+ * 
+ * @param lcd   Display reference
+ * @param valve Reference valve
+ * @param inc   Incremental value to update valve state
+ */
+void valveTimerCallback(Adafruit_PCD8544& lcd, Valve& valve, short inc) {
+  if (inc == 0) {
+    drawValveProperties(lcd, valve, *valveTimer);
+  } else if (NAV_PTR[2] % 2 == 0) {
+    valve.timerHour = (24 + valve.timerHour + inc) % 24;
+  } else {
+    valve.timerMinute = (60 + valve.timerMinute + inc) % 60;
+  }
+}
+
+/*
+ * Displays the valve manual value valve settings' workflow
+ * 
+ * @param lcd   Display reference
+ * @param valve Reference valve
+ * @param inc   Incremental value to update valve state
+ */
+void valveDaysCallback(Adafruit_PCD8544& lcd, Valve& valve, short inc) {
+   if (inc == 0) {
+    drawValveProperties(lcd, valve, *valveDays);
+  } else {
+    short idx = NAV_PTR[2] % WEEK_SIZE;
+    valve.days[idx] = !valve.days[idx];
+  }
+}
+
+// --- "Private" callback utilities ---------------------------
+
+void commonsSettingsCallback(char* title, char* value) {
+  LCD.setTextColor(BLACK);
+  LCD.setTextSize(2);
+  LCD.println(title);
+
+  LCD.println(" ------------ ");
+  LCD.println(" Set: ");
+  LCD.print("   ");
+  LCD.println(value);
+  LCD.println("\n ------------ ");
+}
+
+// Deprecated
 Valve* getValve() {
   short currentValve = NAV_PTR[0];
   return &valves[currentValve];
 }
 
-void getValveHeader(Adafruit_PCD8544* lcd, short idx) {
-  lcd->setTextSize(2);
-  lcd->print("Valve ");
-  lcd->println(idx);
+void getValveHeader(Adafruit_PCD8544& lcd, short idx) {
+  lcd.setTextSize(2);
+  lcd.print("Valve ");
+  lcd.println(idx);
 }
 
-void valveManual(Adafruit_PCD8544* lcd, Valve* v, float txtSize) {
-  lcd->setTextSize(txtSize);
-  lcd->print("Manual: ");
-  lcd->println(parseBoolean(v->manual));
+/*
+ * Draws valve's manual value
+ * 
+ * @param lcd     LCD diplay reference
+ * @param valve   Reference valve
+ * @param txtSize Text size
+ */
+void drawValveManualValue(Adafruit_PCD8544& lcd, Valve& valve) {
+  lcd.print("Manual: ");
+  lcd.println(parseBoolean(valve.manual));
 }
 
-void valveActive(Adafruit_PCD8544* lcd, Valve* v, float txtSize) {
-  lcd->setTextSize(txtSize);
-  lcd->print("Active: ");
-  lcd->println(parseBoolean(v->active));
+void valveActive(Adafruit_PCD8544& lcd, Valve& v) {
+  lcd.print("Active: ");
+  lcd.println(parseBoolean(v.active));
 }
 
-void valveTimer(Adafruit_PCD8544* lcd, Valve* v, float txtSize) {
-  lcd->setTextSize(txtSize);
-  String hours = (v->timerHour < 10 ? "0" : "") + String(v->timerHour);
-  String minutes = (v->timerMinute < 10 ? "0" : "") + String(v->timerMinute);
-  lcd->println("Timer:  " + hours + ":" + minutes);
+void valveTimer(Adafruit_PCD8544& lcd, Valve& v) {
+  String hours = (v.timerHour < 10 ? "0" : "") + String(v.timerHour);
+  String minutes = (v.timerMinute < 10 ? "0" : "") + String(v.timerMinute);
+  lcd.println("Timer:  " + hours + ":" + minutes);
 }
 
-void valveDays(Adafruit_PCD8544* lcd, Valve* v, float txtSize) {
-  lcd->setTextSize(txtSize);
-  lcd->print("Days: ");
+void valveDays(Adafruit_PCD8544& lcd, Valve& v) {
+  lcd.print("Days: ");
 
   bool prevFound = false;
   for (short i = 0; i < WEEK_SIZE; ++i) {
-    if (v->days[i]) {
-      lcd->print(i + 1);
+    if (v.days[i]) {
+      lcd.print(i + 1);
       prevFound = true;
     }
     if (prevFound) {
-      lcd->print(',');
+      lcd.print(',');
     }
   }
 
   if (!prevFound) {
-    lcd->print("  /");
+    lcd.print("  /");
   }
-  lcd->print('\n');
+  lcd.print('\n');
 }
 
-void bar(Adafruit_PCD8544* lcd, bool addSpace) {
-  lcd->setTextSize(1);
-  if(addSpace) {
-    lcd->println("");
-  }
-  lcd->println(" ------------ ");
-}
-
-void valveSettingsCallback(CallbackFunction& func) {
-  Valve* v = getValve();
-  LCD.setTextColor(BLACK);
-  getValveHeader(&LCD, NAV_PTR[0]);
-  bar(&LCD, false);
-  func(&LCD, v, 1.5);
-  bar(&LCD, true);
-  LCD.display();
-}
-
-// --- Valve section callbacks ---------------------------
-
-void displayValve() {
-  Valve *v = getValve();
-
-  LCD.setTextColor(BLACK);
-  getValveHeader(&LCD, NAV_PTR[0]);
-
-  valveManual(&LCD, v, 1);
-  valveActive(&LCD, v, 1);
-  valveTimer(&LCD, v, 1);
-  valveDays(&LCD, v, 1);
-
-  LCD.display();
-}
-
-void valveManualCallback() {
-  valveSettingsCallback(*valveManual);
-}
-
-void valveActiveCallback() {
-  valveSettingsCallback(*valveActive);
-}
-
-void valveTimerCallback() {
-  valveSettingsCallback(*valveTimer);
-}
-
-void valveDaysCallback() {
-  valveSettingsCallback(*valveDays);
+/*
+ * Draws valve properties in valve settings' workflow
+ * 
+ * @param lcd   Display reference
+ * @param valve Valve reference
+ * @param func  Callback function
+ */
+void drawValveProperties(Adafruit_PCD8544& lcd, Valve& valve, CallbackFunction& func) {
+  lcd.setTextColor(BLACK);
+  getValveHeader(lcd, NAV_PTR[0]);
+  lcd.setTextSize(1);
+  lcd.println(" ------------ ");
+  func(lcd, valve);
+  lcd.println("\n ------------ ");
 }
