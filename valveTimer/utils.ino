@@ -1,3 +1,20 @@
+void checkTimer(RtcDateTime& now, Valve* valves, short valvesSize) {
+  for (short i = 0; i < valvesSize; ++i) {
+    RtcDateTime startTimer = new RtcDateTime(now.Year(), now.Month(), now.Day(), valves[i].timerHour, valves[i].timerMinute, 0);
+    RtcDateTime endTimer = startTimer + valves[i].duration;
+    
+    if (!valves[i].manual) {
+      if (startTimer < now && now < endTimer && valves[i].days[now.DayOfWeek() - 1]) {
+        valves[i].active = true;
+        digitalWrite(RELAY_START_PIN + i, HIGH);
+      } else {
+        valves[i].active = false;
+        digitalWrite(RELAY_START_PIN + i, LOW);
+      }
+    }
+  }
+}
+
 char* formatDate(const RtcDateTime* now) {
   short arrSize = 11;
   char* dateString = new char[arrSize];
@@ -18,19 +35,12 @@ char* formatTime(const RtcDateTime* now) {
   return dateString;
 }
 
-const char* parseBoolean(bool value) {
-  return value ? "true" : "false";
-}
-
-// Deprecated
-//void refreshAndLog(Adafruit_PCD8544* lcd, short delayMillis) {
-//  lcd->clearDisplay();
-//  delay(delayMillis);
-//  lcd->display();
-//}
-
 void info(String* message) {
   if (HIGH == digitalRead(DEBUG_PIN)) {
     Serial.println(*message);
   }
+}
+
+const char* parseBoolean(bool value) {
+  return value ? "On" : "Off";
 }

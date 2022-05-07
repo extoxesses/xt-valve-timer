@@ -23,9 +23,6 @@ const short PREV_BTN_PIN = 21;
 
 const short DEBUG_PIN = 23;
 
-const short RELAY_1 = 30;
-const short RELAY_2 = 31;
-const short RELAY_3 = 32;
-const short RELAY_4 = 33;
+const short RELAY_START_PIN = 30;
 
 #endif

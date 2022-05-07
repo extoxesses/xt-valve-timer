@@ -8,10 +8,10 @@ void initGPIO() {
   // Debug
   pinMode(DEBUG_PIN, INPUT);
   // Relay
-  pinMode(RELAY_1, OUTPUT);
-  pinMode(RELAY_2, OUTPUT);
-  pinMode(RELAY_3, OUTPUT);
-  pinMode(RELAY_4, OUTPUT);
+  for(short i = 0; i < MAX_VALVES; ++i) {
+    pinMode(RELAY_START_PIN, OUTPUT);
+    digitalWrite(RELAY_START_PIN + i, LOW);
+  }
   // Interrupts
   short mode = FALLING;
   attachInterrupt(digitalPinToInterrupt(ENTER_BTN_PIN),  onEnterRise,  mode);
@@ -37,7 +37,6 @@ void initStateMachine(StateFunction*** stateMachine, short** stateMachineSize, s
 
 void initRTC(RtcDS1302<ThreeWire>* rtc) {
   RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
-  Serial.println(__TIME__);
   rtc->SetDateTime(compiled);
   rtc->SetIsWriteProtected(false);
   rtc->SetIsRunning(true);

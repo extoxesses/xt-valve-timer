@@ -10,10 +10,11 @@
 // === System properties and configurations ===
 
 typedef struct {
+  bool manual = true;
   bool active = false;
-  bool manual = false;
-  long timerHour = 0;
-  long timerMinute = 0;
+  long timerHour = 12;
+  long timerMinute = 30;
+  long duration = 10;
   bool days[WEEK_SIZE] = {false, false, false, false, false, false, false};
 } Valve;
 Valve valves[MAX_VALVES];
@@ -33,17 +34,18 @@ typedef void (*StateFunction)(Adafruit_PCD8544&, Valve&, short);
 typedef void (CallbackFunction)(Adafruit_PCD8544&, Valve&);
 
 const short SYSTEM_CFG_SIZE = 4;
-const short VALVE_CFG_SIZE = 5;
+const short VALVE_CFG_SIZE = 6;
 short* stateMachineSize;
 
-StateFunction SYSTEM_CFG[SYSTEM_CFG_SIZE] = {&landingScreen, &settingsClockCallback, &settingsCalendarCallback, &settingsContrastCallback};
-StateFunction VALVE_CFG[VALVE_CFG_SIZE] = {&displayValveCallback, &valveManualCallback, &valveActiveCallback, &valveTimerCallback, &valveDaysCallback};
+StateFunction SYSTEM_CFG[SYSTEM_CFG_SIZE] = {&displayLandingScreen, &displaySettingsClockCb, &displaySettingsCalendarCb, &displaySettingsContrastCb};
+StateFunction VALVE_CFG[VALVE_CFG_SIZE] = {&displayValveCb, &displayValveManualCb, &displayValveActiveCb, &displayValveTimerCb, &displayValveDurationCb, &displayValveDaysCb};
 StateFunction** stateMachine;
 
 short IDX = 0;
 short NAV_PTR[3] = {0, 0, 0};
 
 bool refresh;
+short lastMinute;
 
 // --- Arduino routines ---
 
@@ -68,9 +70,14 @@ void setup() {
 }
 
 void loop() {
-  if(refresh) {
+  RtcDateTime now = RTC.GetDateTime();
+  checkTimer(&now, valves, MAX_VALVES);
+  
+  if((lastMinute != now.Minute()) || refresh) {
+    lastMinute = now.Minute();
     LCD.clearDisplay();
-    stateMachine[NAV_PTR[0]][NAV_PTR[1]](LCD, valves[NAV_PTR[0]], 0);
+    short valveIdx = max(0, NAV_PTR[0] - 1);
+    stateMachine[NAV_PTR[0]][NAV_PTR[1]](LCD, valves[valveIdx], 0);
     delay(250);
     LCD.display();
     refresh = false;
