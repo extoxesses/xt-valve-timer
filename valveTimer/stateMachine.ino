@@ -9,18 +9,21 @@
  */
 void displayLandingScreen(Adafruit_PCD8544& lcd, Valve& valve, short inc) {
   RtcDateTime now = RTC.GetDateTime();
+  Serial.println(now);
   lcd.setTextColor(BLACK);
 
   // Time section, in hh:mm format
   lcd.setCursor(13, 5);
   lcd.setTextSize(2);
   char* timeString = formatTime(&now);
+  Serial.println(timeString);
   lcd.println(timeString);
 
   // Date section, in dd/mm/yyyy format
   lcd.setCursor(13, 22);
   lcd.setTextSize(1);
   char* dateString = formatDate(&now);
+  Serial.println(dateString);
   lcd.print(dateString);
 
   // Valves section

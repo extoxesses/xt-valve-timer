@@ -2,7 +2,7 @@ void checkTimer(RtcDateTime& now, Valve* valves, short valvesSize) {
   for (short i = 0; i < valvesSize; ++i) {
     RtcDateTime startTimer = new RtcDateTime(now.Year(), now.Month(), now.Day(), valves[i].timerHour, valves[i].timerMinute, 0);
     RtcDateTime endTimer = startTimer + valves[i].duration;
-    
+
     if (!valves[i].manual) {
       if (startTimer < now && now < endTimer && valves[i].days[now.DayOfWeek() - 1]) {
         valves[i].active = true;
@@ -33,6 +33,11 @@ char* formatTime(const RtcDateTime* now) {
   snprintf_P(dateString, stringSize, PSTR("%02u:%02u"),
              now->Hour(), now->Minute());
   return dateString;
+}
+
+Valve* getValve() {
+  short idx = max(0, NAV_PTR[0] - 1);
+  return &valves[idx];
 }
 
 void info(String* message) {

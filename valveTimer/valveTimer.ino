@@ -71,7 +71,7 @@ void setup() {
 
 void loop() {
   RtcDateTime now = RTC.GetDateTime();
-  checkTimer(&now, valves, MAX_VALVES);
+  // checkTimer(&now, valves, MAX_VALVES);
   
   if((lastMinute != now.Minute()) || refresh) {
     lastMinute = now.Minute();
