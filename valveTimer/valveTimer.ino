@@ -20,7 +20,7 @@ typedef struct {
 Valve valves[MAX_VALVES];
 
 // DISPLAY configuration
-unsigned short contrast = 50;
+unsigned short contrast = 47;
 Adafruit_PCD8544 LCD(D_SCK, D_SDIN, D_DC, D_SCE, D_RES);
 
 // RCT configuration
@@ -71,7 +71,7 @@ void setup() {
 
 void loop() {
   RtcDateTime now = RTC.GetDateTime();
-  // checkTimer(&now, valves, MAX_VALVES);
+  checkTimer(&now, valves, MAX_VALVES);
   
   if((lastMinute != now.Minute()) || refresh) {
     lastMinute = now.Minute();

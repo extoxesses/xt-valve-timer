@@ -1,16 +1,21 @@
 void checkTimer(RtcDateTime& now, Valve* valves, short valvesSize) {
   for (short i = 0; i < valvesSize; ++i) {
     RtcDateTime startTimer = new RtcDateTime(now.Year(), now.Month(), now.Day(), valves[i].timerHour, valves[i].timerMinute, 0);
-    RtcDateTime endTimer = startTimer + valves[i].duration;
+    RtcDateTime endTimer = startTimer + valves[i].duration * 60;
 
-    if (!valves[i].manual) {
-      if (startTimer < now && now < endTimer && valves[i].days[now.DayOfWeek() - 1]) {
+    if (valves[i].manual) {
+      // If manual, do nothing. Skip check
+      continue;
+    } else if (startTimer < now && now < endTimer && valves[i].days[now.DayOfWeek() - 1])
+      // If "now" is in a scheduled range, open relay only if closed
+      if(!valves[i].active) {
         valves[i].active = true;
         digitalWrite(RELAY_START_PIN + i, HIGH);
-      } else {
-        valves[i].active = false;
-        digitalWrite(RELAY_START_PIN + i, LOW);
       }
+    } else if (valves[i].active) {
+      // If "now" isn't in a scheduled range, close relay only if it is open
+      valves[i].active = false;
+      digitalWrite(RELAY_START_PIN + i, LOW);
     }
   }
 }
