@@ -17,7 +17,7 @@ class Valve {
     void setTimerMinute(short);
     int getDuration();
     void setDuration(int);
-    bool* getDays();
+    bool getDay(int);
     void setDay(int, bool);
 
     bool isChanged();

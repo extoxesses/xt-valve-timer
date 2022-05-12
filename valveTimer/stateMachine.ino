@@ -20,7 +20,7 @@ void displayLandingScreen(Adafruit_PCD8544& lcd, Valve& valve, short inc) {
   // Date section, in dd/mm/yyyy format
   lcd.setCursor(13, 22);
   lcd.setTextSize(1);
-  char* dateString = formatDate(&now);
+  char* dateString = XtvUtils::formatDate(&now);
   lcd.print(dateString);
 
   // Valves section
@@ -32,7 +32,7 @@ void displayLandingScreen(Adafruit_PCD8544& lcd, Valve& valve, short inc) {
   for (short i = 0; i < MAX_VALVES; ++i) {
     lcd.setCursor(startPos, 35);
     lcd.setTextSize(1);
-    if (valves[i].active) {
+    if (valves[i].isActive()) {
       lcd.setTextColor(WHITE, BLACK);
       lcd.drawRect(startPos - 1, 34, 7, 9, BLACK);
     }
@@ -144,8 +144,8 @@ void displayValveCb(Adafruit_PCD8544& lcd, Valve& valve, short inc) {
  */
 void displayValveManualCb(Adafruit_PCD8544& lcd, Valve& valve, short inc) {
   if(inc != 0) {
-    valve.manual = !valve.manual;
-    valve.active = false;
+    valve.setManual(!valve.isManual());
+    valve.setActive(false);
   } else {
     drawValveProperties(lcd, valve, *drawValveManualValue);
   }
@@ -159,8 +159,8 @@ void displayValveManualCb(Adafruit_PCD8544& lcd, Valve& valve, short inc) {
  * @param inc   Incremental value to update valve state
  */
 void displayValveActiveCb(Adafruit_PCD8544& lcd, Valve& valve, short inc) {
-  if((inc != 0) && valve.manual) {
-    valve.active = !valve.active;
+  if((inc != 0) && valve.isManual()) {
+    valve.setActive(!valve.isActive());
   } else {
     drawValveProperties(lcd, valve, *drawValveActiveValue);
   }
@@ -177,9 +177,11 @@ void displayValveTimerCb(Adafruit_PCD8544& lcd, Valve& valve, short inc) {
   if (inc == 0) {
     drawValveProperties(lcd, valve, *drawValveTimerValue);
   } else if (NAV_PTR[2] % 2 == 0) {
-    valve.timerHour = (24 + valve.timerHour + inc) % 24;
+    int hour = (24 + valve.getTimerHour() + inc) % 24;
+    valve.setTimerHour(hour);
   } else {
-    valve.timerMinute = (60 + valve.timerMinute + inc) % 60;
+    int minutes = (60 + valve.getTimerMinute() + inc) % 60;
+    valve.setTimerMinute(minutes);
   }
 }
 
@@ -194,7 +196,7 @@ void displayValveDurationCb(Adafruit_PCD8544& lcd, Valve& valve, short inc) {
   if (inc == 0) {
     drawValveProperties(lcd, valve, *drawValveDurationValue);
   } else {
-    valve.duration += inc;
+    valve.setDuration(valve.getDuration() + inc);
   }
 }
 
@@ -210,7 +212,7 @@ void displayValveDaysCb(Adafruit_PCD8544& lcd, Valve& valve, short inc) {
     drawValveProperties(lcd, valve, *drawValveDaysValue);
   } else {
     short idx = NAV_PTR[2] % WEEK_SIZE;
-    valve.days[idx] = !valve.days[idx];
+    valve.setDay(idx, !valve.getDay(idx));
   }
 }
 
@@ -257,7 +259,8 @@ void drawValveHeader(Adafruit_PCD8544& lcd, short idx) {
  */
 void drawValveManualValue(Adafruit_PCD8544& lcd, Valve& valve) {
   lcd.print("Manual: ");
-  lcd.println(parseBoolean(valve.manual));
+  String s = XtvUtils::parseBoolean(valve.isManual());
+  lcd.println(s);
 }
 
 /*
@@ -269,7 +272,8 @@ void drawValveManualValue(Adafruit_PCD8544& lcd, Valve& valve) {
  */
 void drawValveActiveValue(Adafruit_PCD8544& lcd, Valve& valve) {
   lcd.print("Active: ");
-  lcd.println(parseBoolean(valve.active));
+  String s = XtvUtils::parseBoolean(valve.isActive());
+  lcd.println(s);
 }
 
 /*
@@ -280,8 +284,8 @@ void drawValveActiveValue(Adafruit_PCD8544& lcd, Valve& valve) {
  * @param txtSize Text size
  */
 void drawValveTimerValue(Adafruit_PCD8544& lcd, Valve& valve) {
-  String hours = (valve.timerHour < 10 ? "0" : "") + String(valve.timerHour);
-  String minutes = (valve.timerMinute < 10 ? "0" : "") + String(valve.timerMinute);
+  String hours = (valve.getTimerHour() < 10 ? "0" : "") + String(valve.getTimerHour());
+  String minutes = (valve.getTimerMinute() < 10 ? "0" : "") + String(valve.getTimerMinute());
   lcd.println("Timer:  " + hours + ":" + minutes);
 }
 
@@ -294,7 +298,7 @@ void drawValveTimerValue(Adafruit_PCD8544& lcd, Valve& valve) {
  */
 void drawValveDurationValue(Adafruit_PCD8544& lcd, Valve& valve) {
   lcd.print("Duration:  ");
-  lcd.println(valve.duration);
+  lcd.println(valve.getDuration());
 }
 
 /*
@@ -309,7 +313,7 @@ void drawValveDaysValue(Adafruit_PCD8544& lcd, Valve& valve) {
 
   bool prevFound = false;
   for (short i = 0; i < WEEK_SIZE; ++i) {
-    if (valve.days[i]) {
+    if (valve.getDay(i)) {
       lcd.print(i + 1);
       prevFound = true;
     } else {

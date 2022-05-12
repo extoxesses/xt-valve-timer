@@ -57,12 +57,12 @@ void Valve::setDuration(int duration) {
   changed = true;
 }
 
-bool* Valve::getDays() {
-  return days;
+bool Valve::getDay(int idx) {
+  return (idx < WEEK_SIZE) ? days[idx] : false;
 }
 
 void Valve::setDay(int idx, bool state) {
-  if (WEEK_SIZE) {
+  if (idx < WEEK_SIZE) {
     days[idx] = state;
     changed = true;
   }

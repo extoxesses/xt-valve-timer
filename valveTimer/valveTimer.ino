@@ -2,8 +2,8 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_PCD8544.h>
 #include <avr/pgmspace.h>
-#include <ThreeWire.h>
-#include <RtcDS1302.h>
+// #include <ThreeWire.h>
+// #include <RtcDS1302.h>
 
 #include "includes/xtv_utils.h"
 
@@ -42,7 +42,7 @@ short lastMinute;
 
 void setup() {
   String msg = "Setup started...";
-  info(&msg);
+  XtvUtils::info(&msg);
 
   Serial.begin(9600);
   // Init state machine and system inital state
@@ -57,7 +57,7 @@ void setup() {
   delay(1000);
 
   msg = "Setup completed";
-  info(&msg);
+  XtvUtils::info(&msg);
 }
 
 void loop() {
