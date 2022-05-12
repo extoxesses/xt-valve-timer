@@ -72,8 +72,8 @@ void setup() {
 void loop() {
   RtcDateTime now = RTC.GetDateTime();
   checkTimer(&now, valves, MAX_VALVES);
-  
-  if((lastMinute != now.Minute()) || refresh) {
+
+  if ((lastMinute != now.Minute()) || refresh) {
     lastMinute = now.Minute();
     LCD.clearDisplay();
     short valveIdx = max(0, NAV_PTR[0] - 1);

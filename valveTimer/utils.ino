@@ -6,7 +6,7 @@ void checkTimer(RtcDateTime& now, Valve* valves, short valvesSize) {
     if (valves[i].manual) {
       // If manual, do nothing. Skip check
       continue;
-    } else if (startTimer < now && now < endTimer && valves[i].days[now.DayOfWeek() - 1])
+    } else if (startTimer < now && now < endTimer && valves[i].days[now.DayOfWeek() - 1]) {
       // If "now" is in a scheduled range, open relay only if closed
       if(!valves[i].active) {
         valves[i].active = true;
