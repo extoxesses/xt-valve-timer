@@ -9,7 +9,6 @@ void onEnterRise() {
     NAV_PTR[2]++;
   }
   refresh = true;
-  // Serial.println("NAV_PTR:{" + NAV_PTR[0] + "," + NAV_PTR[1] + "," + NAV_PTR[2] + "}" );
 }
 
 void onReturnRise() {
@@ -19,7 +18,6 @@ void onReturnRise() {
   IDX = max(0, IDX - 1);
   setSubmenuStatus();
   refresh = true;
-  // Serial.println("NAV_PTR:{" + NAV_PTR[0] + "," + NAV_PTR[1] + "," + NAV_PTR[2] + "}" );
 }
 
 void onNextRise() {
@@ -32,11 +30,10 @@ void onNextRise() {
       onNextRise();
     }
   } else {
-    stateMachine[NAV_PTR[0]][NAV_PTR[1]](LCD, *getValve(), 1);
+    stateMachine[NAV_PTR[0]][NAV_PTR[1]](LCD, *XtvUtils::getValve(), 1);
   }
 
   refresh = true;
-  // Serial.println("NAV_PTR:{" + NAV_PTR[0] + "," + NAV_PTR[1] + "," + NAV_PTR[2] + "}" );
 }
 
 void onPrevRise() {
@@ -49,11 +46,10 @@ void onPrevRise() {
       onPrevRise();
     }
   } else {
-    stateMachine[NAV_PTR[0]][NAV_PTR[1]](LCD, *getValve(), -1);
+    stateMachine[NAV_PTR[0]][NAV_PTR[1]](LCD, *XtvUtils::getValve(), -1);
   }
 
   refresh = true;
-  // Serial.println("NAV_PTR:{" + NAV_PTR[0] + "," + NAV_PTR[1] + "," + NAV_PTR[2] + "}" );
 }
 
 // -- Utilities functions --

@@ -5,18 +5,19 @@
 #include <ThreeWire.h>
 #include <RtcDS1302.h>
 
-#include "constants.h"
+//#include "constants.h"
+#include "includes/xtv_utils.h"
 
 // === System properties and configurations ===
 
-typedef struct {
-  bool manual = true;
-  bool active = false;
-  long timerHour = 12;
-  long timerMinute = 30;
-  long duration = 10;
-  bool days[WEEK_SIZE] = {false, false, false, false, false, false, false};
-} Valve;
+//typedef struct {
+//  bool manual = true;
+//  bool active = false;
+//  long timerHour = 12;
+//  long timerMinute = 30;
+//  long duration = 10;
+//  bool days[WEEK_SIZE] = {false, false, false, false, false, false, false};
+//} Valve;
 Valve valves[MAX_VALVES];
 
 // DISPLAY configuration
@@ -71,7 +72,7 @@ void setup() {
 
 void loop() {
   RtcDateTime now = RTC.GetDateTime();
-  checkTimer(&now, valves, MAX_VALVES);
+  XtvUtils::checkTimer(&now, valves, MAX_VALVES);
 
   if ((lastMinute != now.Minute()) || refresh) {
     lastMinute = now.Minute();

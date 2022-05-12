@@ -14,7 +14,7 @@ void displayLandingScreen(Adafruit_PCD8544& lcd, Valve& valve, short inc) {
   // Time section, in hh:mm format
   lcd.setCursor(13, 5);
   lcd.setTextSize(2);
-  char* timeString = formatTime(&now);
+  char* timeString = XtvUtils::formatTime(&now);
   lcd.println(timeString);
 
   // Date section, in dd/mm/yyyy format
@@ -56,7 +56,7 @@ void displayLandingScreen(Adafruit_PCD8544& lcd, Valve& valve, short inc) {
 void displaySettingsClockCb(Adafruit_PCD8544& lcd, Valve& valve, short inc) {
   RtcDateTime now = RTC.GetDateTime();
   if (0 == inc) {
-    char* timeString = formatTime(&now);
+    char* timeString = XtvUtils::formatTime(&now);
     drawSettingsCb(lcd, "Clock", timeString);
   } else {
     short minute = now.Minute();
@@ -81,7 +81,7 @@ void displaySettingsClockCb(Adafruit_PCD8544& lcd, Valve& valve, short inc) {
 void displaySettingsCalendarCb(Adafruit_PCD8544& lcd, Valve& valve, short inc) {
   RtcDateTime now = RTC.GetDateTime();
   if (0 == inc) {
-    char* dateString = formatDate(&now);
+    char* dateString = XtvUtils::formatDate(&now);
     drawSettingsCb(lcd, "Date", dateString);
   } else {
     short day = now.Day();

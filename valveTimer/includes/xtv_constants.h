@@ -1,5 +1,5 @@
-#ifndef XT_VALVE_TIMER_CONST
-#define XT_VALVE_TIMER_CONST
+#ifndef XT_VALVE_TIMER_CONST_H
+#define XT_VALVE_TIMER_CONST_H
 
 // System
 const short MAX_VALVES = 4;
@@ -25,4 +25,4 @@ const short DEBUG_PIN = 23;
 
 const short RELAY_START_PIN = 30;
 
-#endif
+#endif /* XT_VALVE_TIMER_CONST_H */
