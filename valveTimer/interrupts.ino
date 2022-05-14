@@ -31,7 +31,7 @@ void onNextRise() {
     }
   } else {
     Valve* valve = XtvUtils::getValve(valves, NAV_PTR);
-    stateMachine[NAV_PTR[0]][NAV_PTR[1]](LCD, *valve, 1);
+    stateMachine[NAV_PTR[0]][NAV_PTR[1]](settings, valves, NAV_PTR, -1);
   }
 
   refresh = true;
@@ -48,7 +48,7 @@ void onPrevRise() {
     }
   } else {
     Valve* valve = XtvUtils::getValve(valves, NAV_PTR);
-    stateMachine[NAV_PTR[0]][NAV_PTR[1]](LCD, *valve, -1);
+    stateMachine[NAV_PTR[0]][NAV_PTR[1]](settings, valves, NAV_PTR, -1);
   }
 
   refresh = true;

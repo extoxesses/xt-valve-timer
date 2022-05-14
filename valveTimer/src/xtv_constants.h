@@ -5,6 +5,9 @@
 const short MAX_VALVES = 4;
 const short WEEK_SIZE = 7;
 
+const short SYSTEM_CFG_SIZE = 4;
+const short VALVE_CFG_SIZE = 6;
+
 // GPIO pins
 const short D_RES  = 3;
 const short D_SCE  = 4;
