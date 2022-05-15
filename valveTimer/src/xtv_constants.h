@@ -9,11 +9,11 @@ const short SYSTEM_CFG_SIZE = 4;
 const short VALVE_CFG_SIZE = 6;
 
 // GPIO pins
-const short D_RES  = 3;
-const short D_SCE  = 4;
-const short D_DC   = 5;
-const short D_SDIN = 6;
-const short D_SCK  = 7;
+const short LCD_RES  = 3;
+const short LCD_SCE  = 4;
+const short LCD_DC   = 5;
+const short LCD_SDIN = 6;
+const short LCD_SCK  = 7;
 
 const short RTC_DAT = 9;
 const short RTC_CLK = 8;

@@ -8,7 +8,7 @@
 class StateMachine {
 
   public:
-    /*
+   /*
     * Displays the timer landing page
     */
     static void displayLandingScreen(XtvSettings& settings, Valve* valves, short* indexes, short inc) {
