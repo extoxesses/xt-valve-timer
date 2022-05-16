@@ -1,11 +1,8 @@
 #include "src/xtv_settings.h"
 
-XtvSettings::XtvSettings() {
+XtvSettings::XtvSettings() : rtc(*(new ThreeWire(RTC_DAT, RTC_CLK, RTC_RST))) {
   contrast = 47;
   lcd = new Adafruit_PCD8544(LCD_SCK, LCD_SDIN, LCD_DC, LCD_SCE, LCD_RES);
-
-  ThreeWire rtc_wire(RTC_DAT, RTC_CLK, RTC_RST);
-  rtc = new RtcDS1302<ThreeWire>(rtc_wire);
 }
 
 unsigned short XtvSettings::getContrast(){
@@ -21,5 +18,5 @@ Adafruit_PCD8544& XtvSettings::getLcd(){
 }
 
 RtcDS1302<ThreeWire>& XtvSettings::getRtc(){
-  return *rtc;
+  return rtc;
 }

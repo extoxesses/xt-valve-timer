@@ -11,7 +11,7 @@ class XtvUtils {
   public:
     static void checkTimer(RtcDateTime& now, Valve* valves, short valvesSize) {
       for (short i = 0; i < valvesSize; ++i) {
-        RtcDateTime startTimer = new RtcDateTime(now.Year(), now.Month(), now.Day(), valves[i].getTimerHour(), valves[i].getTimerMinute(), 0);
+        RtcDateTime startTimer(now.Year(), now.Month(), now.Day(), valves[i].getTimerHour(), valves[i].getTimerMinute(), 0);
         RtcDateTime endTimer = startTimer + valves[i].getDuration() * 60;
 
         if (valves[i].isManual()) {
@@ -31,23 +31,15 @@ class XtvUtils {
       }
     }
 
-    static char* formatDate(const RtcDateTime* now) {
-      short arrSize = 11;
-      char* dateString = new char[arrSize];
-      short stringSize = arrSize * 8; // char sizeOf
-
-      snprintf_P(dateString, stringSize, PSTR("%02u/%02u/%04u"),
-                now->Day(), now->Month(), now->Year());
+    static char* formatDate(const RtcDateTime& now) {
+      char* dateString = new char[11];
+      sprintf(dateString, "%02u/%02u/%04u", now.Day(), now.Month(), now.Year());
       return dateString;
     }
 
-    static char* formatTime(const RtcDateTime* now) {
-      short arrSize = 6;
-      char* dateString = new char[arrSize];
-      short stringSize = arrSize * 8; // char sizeOf
-
-      snprintf_P(dateString, stringSize, PSTR("%02u:%02u"),
-                now->Hour(), now->Minute());
+    static char* formatTime(const RtcDateTime& now) {
+      char* dateString = new char[6];
+      sprintf(dateString, "%02u:%02u", now.Hour(), now.Minute());
       return dateString;
     }
 
@@ -56,14 +48,41 @@ class XtvUtils {
       return &valves[idx];
     }
 
-    static const char* parseBoolean(bool value) {
-      return value ? "On" : "Off";
+    static void info(String& message) {
+      if (HIGH == digitalRead(DEBUG_PIN)) {
+        Serial.println(message);
+      }
     }
 
-    static void info(String* message) {
-      if (HIGH == digitalRead(DEBUG_PIN)) {
-        Serial.println(*message);
+    static void logRtcConfiguration(RtcDateTime& compiled, RtcDS1302<ThreeWire>& rtc) {
+      Serial.println("=== RTC Configuration ===");
+      Serial.println(__DATE__);
+      Serial.println(__TIME__);
+      Serial.println(compiled);
+      Serial.println(rtc.GetDateTime());
+      Serial.println("=========================");
+    }
+
+    static void onChangeLog(short* indexes, bool refresh, short lastMinute) {
+      if (LOW == digitalRead(DEBUG_PIN)) {
+        return;
       }
+
+      char navBuffer[28];
+      sprintf(navBuffer, "Navigation indexes: [%u,%u,%u]", indexes[0], indexes[1], indexes[2]);
+      Serial.println(navBuffer);
+
+      char refreshBuffer[15];
+      sprintf(refreshBuffer, "Refresh: %s", parseBoolean(refresh));
+      Serial.println(refreshBuffer);
+      
+      char minBuffer[16];
+      sprintf(minBuffer, "Last minute: %i", lastMinute);
+      Serial.println(minBuffer);
+    }
+
+    static const char* parseBoolean(bool value) {
+      return value ? "On" : "Off";
     }
 
 };

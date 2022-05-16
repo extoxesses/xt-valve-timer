@@ -18,13 +18,13 @@ class StateMachine {
       // Time section, in hh:mm format
       settings.getLcd().setCursor(13, 5);
       settings.getLcd().setTextSize(2);
-      char* timeString = XtvUtils::formatTime(&now);
+      char* timeString = XtvUtils::formatTime(now);
       settings.getLcd().println(timeString);
 
       // Date section, in dd/mm/yyyy format
       settings.getLcd().setCursor(13, 22);
       settings.getLcd().setTextSize(1);
-      char* dateString = XtvUtils::formatDate(&now);
+      char* dateString = XtvUtils::formatDate(now);
       settings.getLcd().print(dateString);
 
       // Valves section
@@ -56,7 +56,7 @@ class StateMachine {
     static void displaySettingsClockCb(XtvSettings& settings, Valve* valves, short* indexes, short inc) {
       RtcDateTime now = settings.getRtc().GetDateTime();
       if (0 == inc) {
-        char* timeString = XtvUtils::formatTime(&now);
+        char* timeString = XtvUtils::formatTime(now);
         drawSettingsCb(settings.getLcd(), "Clock", timeString);
       } else {
         short minute = now.Minute();
@@ -66,7 +66,7 @@ class StateMachine {
         } else {
           hour += inc;
         }
-        RtcDateTime date = new RtcDateTime(now.Year(), now.Month(), now.Day(), hour, minute, now.Second());
+        RtcDateTime date(now.Year(), now.Month(), now.Day(), hour, minute, now.Second());
         settings.getRtc().SetDateTime(date);
       }
     }
@@ -77,7 +77,7 @@ class StateMachine {
     static void displaySettingsCalendarCb(XtvSettings& settings, Valve* valves, short* indexes, short inc) {
       RtcDateTime now = settings.getRtc().GetDateTime();
       if (0 == inc) {
-        char* dateString = XtvUtils::formatDate(&now);
+        char* dateString = XtvUtils::formatDate(now);
         drawSettingsCb(settings.getLcd(), "Date", dateString);
       } else {
         short day = now.Day();
@@ -90,7 +90,7 @@ class StateMachine {
         } else {
           year += inc;
         }
-        RtcDateTime date = new RtcDateTime(year, month, day, now.Hour(), now.Minute(), now.Second());
+        RtcDateTime date(year, month, day, now.Hour(), now.Minute(), now.Second());
         settings.getRtc().SetDateTime(date);
       }
     }
@@ -194,7 +194,7 @@ class StateMachine {
     /*
     * Draws common settings page
     */
-    static void drawSettingsCb(Adafruit_PCD8544& lcd, char* title, char* value) {
+    static void drawSettingsCb(Adafruit_PCD8544& lcd, String title, char* value) {
       lcd.setTextColor(BLACK);
       lcd.setTextSize(2);
       lcd.println(title);

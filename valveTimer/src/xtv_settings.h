@@ -26,7 +26,7 @@ class XtvSettings {
   private:
     unsigned short contrast;
     Adafruit_PCD8544* lcd;
-    RtcDS1302<ThreeWire>* rtc;
+    RtcDS1302<ThreeWire> rtc;
 };
 
 #endif /* XT_VALVE_TIMER_SETTINGS_H */

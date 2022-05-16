@@ -36,21 +36,11 @@ void initStateMachine(StateFunction*** stateMachine, short** stateMachineSize, s
 }
 
 void initRTC(RtcDS1302<ThreeWire>& rtc) {
+  rtc.Begin();
   RtcDateTime compiled(__DATE__, __TIME__);
-  rtc.SetIsWriteProtected(false);
   rtc.SetDateTime(compiled);
+  rtc.SetIsWriteProtected(false);
   rtc.SetIsRunning(true);
 
-  logRtcConfiguration(compiled, rtc);
-}
-
-// --- "Private" methods
-
-void logRtcConfiguration(RtcDateTime& compiled, RtcDS1302<ThreeWire>& rtc) {
-  Serial.println("=== RTC Configuration ===");
-  Serial.println(__DATE__);
-  Serial.println(__TIME__);
-  Serial.println(compiled);
-  Serial.println(rtc.GetDateTime());
-  Serial.println("=========================");
+  XtvUtils::logRtcConfiguration(compiled, rtc);
 }

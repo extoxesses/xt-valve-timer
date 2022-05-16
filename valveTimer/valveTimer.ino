@@ -8,7 +8,7 @@ StateFunction SYSTEM_CFG[SYSTEM_CFG_SIZE] = {&StateMachine::displayLandingScreen
 StateFunction VALVE_CFG[VALVE_CFG_SIZE] = {&StateMachine::displayValveCb, &StateMachine::displayValveManualCb, &StateMachine::displayValveActiveCb, &StateMachine::displayValveTimerCb, &StateMachine::displayValveDurationCb, &StateMachine::displayValveDaysCb};
 
 // --- Timer configuration variables
-XtvSettings* settings;
+XtvSettings settings;
 Valve valves[MAX_VALVES];
 
 short* stateMachineSize;
@@ -25,7 +25,6 @@ short lastMinute;
 void setup() {
   Serial.begin(9600);
   Serial.println("Setup started...");
-  settings = new XtvSettings();
   
   // Init state machine and system inital state
   initStateMachine(&stateMachine, &stateMachineSize, MAX_VALVES);
@@ -33,8 +32,8 @@ void setup() {
   // Init GPIO pins
   initGPIO();
   // Init peripherals
-  initDisplay(settings->getLcd(), settings->getContrast());
-  initRTC(settings->getRtc());
+  initDisplay(settings.getLcd(), settings.getContrast());
+  initRTC(settings.getRtc());
 
   // Wait system to be stable, and run with start configuration
   delay(1000);
@@ -42,17 +41,15 @@ void setup() {
 }
 
 void loop() {
-  RtcDateTime now = settings->getRtc().GetDateTime();
-  Serial.println(now);
-  XtvUtils::checkTimer(&now, valves, MAX_VALVES);
+  RtcDateTime now = settings.getRtc().GetDateTime();
+  XtvUtils::checkTimer(now, valves, MAX_VALVES);
 
   if ((lastMinute != now.Minute()) || refresh) {
     lastMinute = now.Minute();
-    settings->getLcd().clearDisplay();
-    short valveIdx = max(0, NAV_PTR[0] - 1);
-    stateMachine[NAV_PTR[0]][NAV_PTR[1]](*settings, valves, NAV_PTR, 0);
+    settings.getLcd().clearDisplay();
+    stateMachine[NAV_PTR[0]][NAV_PTR[1]](settings, valves, NAV_PTR, 0);
     delay(250);
-    settings->getLcd().display();
+    settings.getLcd().display();
     refresh = false;
   }
 }

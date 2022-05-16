@@ -9,6 +9,7 @@ void onEnterRise() {
     NAV_PTR[2]++;
   }
   refresh = true;
+  XtvUtils::onChangeLog(NAV_PTR, refresh, lastMinute);
 }
 
 void onReturnRise() {
@@ -18,6 +19,7 @@ void onReturnRise() {
   IDX = max(0, IDX - 1);
   setSubmenuStatus();
   refresh = true;
+  XtvUtils::onChangeLog(NAV_PTR, refresh, lastMinute);
 }
 
 void onNextRise() {
@@ -30,11 +32,11 @@ void onNextRise() {
       onNextRise();
     }
   } else {
-    Valve* valve = XtvUtils::getValve(valves, NAV_PTR);
-    stateMachine[NAV_PTR[0]][NAV_PTR[1]](*settings, valves, NAV_PTR, -1);
+    stateMachine[NAV_PTR[0]][NAV_PTR[1]](settings, valves, NAV_PTR, -1);
   }
 
   refresh = true;
+  XtvUtils::onChangeLog(NAV_PTR, refresh, lastMinute);
 }
 
 void onPrevRise() {
@@ -47,11 +49,11 @@ void onPrevRise() {
       onPrevRise();
     }
   } else {
-    Valve* valve = XtvUtils::getValve(valves, NAV_PTR);
-    stateMachine[NAV_PTR[0]][NAV_PTR[1]](*settings, valves, NAV_PTR, -1);
+    stateMachine[NAV_PTR[0]][NAV_PTR[1]](settings, valves, NAV_PTR, -1);
   }
 
   refresh = true;
+  XtvUtils::onChangeLog(NAV_PTR, refresh, lastMinute);
 }
 
 // -- Utilities functions --
