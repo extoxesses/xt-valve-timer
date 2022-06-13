@@ -1,7 +1,7 @@
-void initDisplay(Adafruit_PCD8544* lcd, short contrast) {
-  lcd->begin();
-  lcd->setContrast(contrast);
-  lcd->clearDisplay();
+void initDisplay(Adafruit_PCD8544& lcd, short contrast) {
+  lcd.begin();
+  lcd.setContrast(contrast);
+  lcd.clearDisplay();
 }
 
 void initGPIO() {
@@ -35,9 +35,20 @@ void initStateMachine(StateFunction*** stateMachine, short** stateMachineSize, s
   refresh = true;
 }
 
-void initRTC(RtcDS1302<ThreeWire>* rtc) {
-  RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
-  rtc->SetDateTime(compiled);
-  rtc->SetIsWriteProtected(false);
-  rtc->SetIsRunning(true);
+void initRTC(RtcDS1302<ThreeWire>& rtc) {
+  Serial.println("Started RTC configurations...");
+  rtc.Begin();
+
+  if (!rtc.IsDateTimeValid()) {
+    RtcDateTime compiled(__DATE__, __TIME__);
+    Serial.print("Invalid date-time. Use compile time: ");
+    Serial.println(compiled);
+    rtc.SetDateTime(compiled);
+  }
+
+  rtc.SetIsWriteProtected(false);
+  rtc.SetIsRunning(true);
+
+  Serial.print("RTC configured: ");
+  Serial.println(rtc.GetDateTime());
 }
