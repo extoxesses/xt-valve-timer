@@ -1,124 +1,122 @@
-/// void XtvSdManager::saveSettings(XtvSettings& settings, Valve* valves, short size) {
-//   XtvUtils::info("Saving settings...");
-//   SD.remove(SETTINGS_FILE_NAME);
-//   File file = SD.open(SETTINGS_FILE_NAME, FILE_WRITE);
-//   if (file) {
-//     XtvUtils::info("File correctly opened. Writing json...");
-//     String json;
-//     this->toJson(json, settings, valves, size);
-//     file.println(json);
-//     file.close();
-//   } else {
-//     XtvUtils::info("ERROR: unable to open file");
-//   }
-//   XtvUtils::info("Settings write completed.");
-// }
+#include "../include/xtv_sd_manager.h"
 
-// // --- Private methods
+XtvSdManager::XtvSdManager() {
+  // Do nothing
+}
 
-// void XtvSdManager::toJson(String& json, XtvSettings& settings, Valve* valves, short size) {
-//   StaticJsonDocument<JSON_SIZE> document;
-//   this->serializeSettings(document, settings);
+void XtvSdManager::initSD() {
+  if (SD.begin()) {
+    XtvUtils::info("SD: Initialization done.");
+  } else {
+    XtvUtils::info("SD ERROR: Initialization failed!");
+  }
+  delay(500);
+}
 
-//   JsonArray valvesArray = document.createNestedArray("valves");
-//   for (int i = 0; i < size; ++i) {
-//     this->serializeValve(valvesArray, valves[i], i);
-//   }
+bool XtvSdManager::saveSettings(XtvSettings& settings, Valve* valves, short size) {
+  XtvUtils::info("Saving settings...");
+  bool status = false;
+  
+  // Note: not move file name into a constant! Process doesn't work properly
+  SD.remove("settings.json");
+  File file = SD.open("settings.json", FILE_WRITE);
 
-//   serializeJson(document, json);
-// }
+  if (file) {
+    XtvUtils::info("File correctly opened. Writing json...");
+    String json;
+    toJson(json, settings, valves, size);
+    file.println(json);
+    file.close();
+    status = true;
+  } else {
+    XtvUtils::info("ERROR: unable to open file");
+  }
 
-// void XtvSdManager::serializeSettings(StaticJsonDocument<JSON_SIZE>& document, XtvSettings& settings) {
-//   document["settings"]["contrast"] = settings.getContrast();
-// }
+  XtvUtils::info("Settings write completed.");
+  return status;
+}
 
-// void XtvSdManager::serializeValve(JsonArray& valvesArray, Valve& valve, short id) {
-//   JsonObject jsonValve = valvesArray.createNestedObject();
+bool XtvSdManager::loadSettings(XtvSettings& settings, Valve* valves, short size) {
+  String fileName = "settings.txt";
+  if (!SD.exists(fileName)) {
+    XtvUtils::info("WARN: Unable to load settings file: file not exists");
+    return false;
+  }
 
-//   jsonValve["id"] = id;
-//   jsonValve["manual"] = valve.isManual();
-//   jsonValve["timerHour"] = valve.getTimerHour();
-//   jsonValve["timerMinute"] = valve.getTimerMinute();
-//   jsonValve["duration"] = valve.getDuration();
+  File file = SD.open(fileName, FILE_READ);
+  if (!file) {
+    XtvUtils::info("ERROR: Unable to open settings file!");
+    return false;
+  }
+  
+  Serial.println("sono dentro!");
+  String json = file.readString();
+  DynamicJsonDocument document(JSON_SIZE);
+  deserializeJson(document, json);
+  
+  settings.setContrast(document["contrast"].as<int>());
+  deserializeValves(document, valves, size);
+  file.close();
+  
+  XtvUtils::info("Settings file load completed!");
+  return true;
+}
 
-//   JsonArray days = jsonValve.createNestedArray("days");
-//   for (int i = 0; i < WEEK_SIZE; ++i) {
-//     if (valve.getDay(i)) {
-//       days.add(i);
-//     }
-//   }
-// }
+// --- Private methods
 
+void XtvSdManager::toJson(String& json, XtvSettings& settings, Valve* valves, short size) {
+  StaticJsonDocument<JSON_SIZE> document;
+  serializeSettings(document, settings);
 
+  JsonArray valvesArray = document.createNestedArray("valves");
+  for (int i = 0; i < size; ++i) {
+    serializeValve(valvesArray, valves[i], i);
+  }
 
+  serializeJson(document, json);
+}
 
+void XtvSdManager::serializeSettings(StaticJsonDocument<JSON_SIZE>& document, XtvSettings& settings) {
+  document["settings"]["contrast"] = settings.getContrast();
+}
 
+void XtvSdManager::serializeValve(JsonArray& valvesArray, Valve& valve, short id) {
+  JsonObject jsonValve = valvesArray.createNestedObject();
 
-// // void XtvSdManager::readSettings(XtvSettings& settings) {
-// //   const String fileName = "settings.txt"; // TODO: move to constant
-// //   File file = SD.open(fileName, FILE_WRITE);
-// //   if (file) {
-// //     this->readSettingsFile(file, settings);
-// //     file.close();
-// //   }
-// // }
+  jsonValve["id"] = id;
+  jsonValve["manual"] = valve.isManual();
+  jsonValve["timerHour"] = valve.getTimerHour();
+  jsonValve["timerMinute"] = valve.getTimerMinute();
+  jsonValve["duration"] = valve.getDuration();
 
-// // void XtvSdManager::readValve() { }
+  JsonArray days = jsonValve.createNestedArray("days");
+  for (int i = 0; i < WEEK_SIZE; ++i) {
+    if (valve.getDay(i)) {
+      days.add(i);
+    }
+  }
+}
 
-// // void XtvSdManager::writeSettings(XtvSettings& settings) {
-// //   const String fileName = "settings.txt"; // TODO: move to constant
-// //   File file = SD.open(fileName, FILE_WRITE);
-// //   if (file) {
-// //     this->writeSettingsFile(file, settings);
-// //     file.close();
-// //   }
-// // }
+void XtvSdManager::deserializeValves(DynamicJsonDocument& document, Valve* valves, short size) {
+  for (int i = 0; i < size; ++i) {
+    JsonObject jsonValve = document["valves"][i].to<JsonObject>();
+    short id = jsonValve["id"].as<int>();
+    deserializeValve(jsonValve, valves[id]);
+  }
+}
 
-// // void XtvSdManager::writeValve() {
+void XtvSdManager::deserializeValve(JsonObject& jsonValve, Valve& valve) {
+  valve.setManual(jsonValve["manual"].as<bool>());
+  Serial.println(jsonValve["manual"].as<bool>());
+  Serial.println(valve.isManual());
 
-// // }
-
-// // // --- Private methods
-
-// // void XtvSdManager::readSettingsYaml(File& file, XtvSettings& settings) {
-// //   while (file.available()) {
-// //     String raw = file.readString();
-// //     unsigned int index = raw.indexOf(':') + 1;
-// //     if (index < raw.length()) {
-// //       String key = raw.substring(0, index);
-// //       String value = raw.substring(index, raw.length());
-// //       String contrastKey = "contrast"; // TODO: move to constants
-// //       if(contrastKey.equals(key)) {
-// //         settings.setContrast(value.toInt());
-// //       }
-// //     }
-// //   }
-// // }
-
-// // void XtvSdManager::writeSettingsYaml(File& file, XtvSettings& settings) {
-// //   file.println("settings: ");
-// //   file.print("  contrast: ");
-// //   file.println(settings.getContrast());
-// // }
-
-// // void XtvSdManager::writeValveYaml(File& file, XtValve& valve, int id) {
-// //   file.println("valve: ");
-
-// //   file.print("  id: ");
-// //   file.println(id);  
-// //   file.print("  manual: ");
-// //   file.println(valve.isManual());
-// //   file.print("  timerHour: ");
-// //   file.println(valve.getTimerHour());
-// //   file.print("  timerMinute: ");
-// //   file.println(valve.getTimerMinute());
-// //   file.print("  duration: ");
-// //   file.println(valve.getDuration());
-// //   file.print("  days: ");
-// //   for (short i = 0; i < WEEK_SIZE; ++i) {
-// //     if (valve.getDay(i)) {
-// //       file.print(i);
-// //       file.print(',');
-// //     }
-// //   }
-// // }
+  valve.setActive(false);
+  valve.setTimerHour(jsonValve["timerHour"].as<int>());
+  valve.setTimerMinute(jsonValve["timerMinute"].as<int>());
+  valve.setDuration(jsonValve["duration"].as<int>());
+  
+  JsonArray array = jsonValve["days"];
+  for(JsonVariant v : array) {
+    valve.setDay(v.as<int>(), true);
+  }
+}

@@ -9,7 +9,7 @@ StateFunction SYSTEM_CFG[SYSTEM_CFG_SIZE] = {&StateMachine::displayLandingScreen
 StateFunction VALVE_CFG[VALVE_CFG_SIZE] = {&StateMachine::displayValveCb, &StateMachine::displayValveManualCb, &StateMachine::displayValveActiveCb, &StateMachine::displayValveTimerCb, &StateMachine::displayValveDurationCb, &StateMachine::displayValveDaysCb};
 
 // --- Timer configuration variables
-// XtvSdManager sdManager;
+XtvSdManager sdManager;
 XtvSettings settings;
 Valve valves[MAX_VALVES];
 
@@ -37,9 +37,13 @@ void setup() {
   // Init peripherals
   initDisplay(settings.getLcd(), settings.getContrast());
   initRTC(settings.getRtc());
-  XtvSdManager::initSD();
-  update = XtvSdManager::loadSettings(settings, valves, MAX_VALVES);
-
+  // Init SD card
+  sdManager.initSD();
+  do {
+    update = sdManager.loadSettings(settings, valves, MAX_VALVES);
+    delay(500);
+  } while(!update);
+  
   // Wait system to be stable, and run with start configuration
   delay(1000);
   Serial.println("Setup completed");
@@ -59,6 +63,6 @@ void loop() {
   }
 
   if ((0 == IDX) && update) {
-    update = !XtvSdManager::saveSettings(settings, valves, MAX_VALVES);
+    update = !sdManager.saveSettings(settings, valves, MAX_VALVES);
   }
 }
