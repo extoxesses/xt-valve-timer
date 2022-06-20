@@ -48,7 +48,7 @@ class XtvUtils {
       return &valves[idx];
     }
 
-    static void info(String& message) {
+    static void info(String message) {
       if (HIGH == digitalRead(DEBUG_PIN)) {
         Serial.println(message);
       }

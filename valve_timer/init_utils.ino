@@ -9,7 +9,7 @@ void initGPIO() {
   pinMode(DEBUG_PIN, INPUT);
   // Relay
   for(short i = 0; i < MAX_VALVES; ++i) {
-    pinMode(RELAY_START_PIN, OUTPUT);
+    pinMode(RELAY_START_PIN + i, OUTPUT);
     digitalWrite(RELAY_START_PIN + i, LOW);
   }
   // Interrupts

@@ -1,3 +1,4 @@
+#include "include/xtv_sd_manager.h"
 #include "include/xtv_settings.h"
 #include "include/xtv_state_machine.h"
 #include "include/xtv_types.h"
@@ -8,6 +9,7 @@ StateFunction SYSTEM_CFG[SYSTEM_CFG_SIZE] = {&StateMachine::displayLandingScreen
 StateFunction VALVE_CFG[VALVE_CFG_SIZE] = {&StateMachine::displayValveCb, &StateMachine::displayValveManualCb, &StateMachine::displayValveActiveCb, &StateMachine::displayValveTimerCb, &StateMachine::displayValveDurationCb, &StateMachine::displayValveDaysCb};
 
 // --- Timer configuration variables
+// XtvSdManager sdManager;
 XtvSettings settings;
 Valve valves[MAX_VALVES];
 
@@ -19,6 +21,7 @@ short NAV_PTR[3] = {0, 0, 0};
 
 bool refresh;
 short lastMinute;
+bool update;
 
 // --- Arduino routines
 
@@ -34,6 +37,8 @@ void setup() {
   // Init peripherals
   initDisplay(settings.getLcd(), settings.getContrast());
   initRTC(settings.getRtc());
+  XtvSdManager::initSD();
+  update = XtvSdManager::loadSettings(settings, valves, MAX_VALVES);
 
   // Wait system to be stable, and run with start configuration
   delay(1000);
@@ -51,5 +56,9 @@ void loop() {
     delay(250);
     settings.getLcd().display();
     refresh = false;
+  }
+
+  if ((0 == IDX) && update) {
+    update = !XtvSdManager::saveSettings(settings, valves, MAX_VALVES);
   }
 }

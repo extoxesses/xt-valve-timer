@@ -20,9 +20,6 @@ class Valve {
     bool getDay(int);
     void setDay(int, bool);
 
-    bool isChanged();
-    void setChanged();
-
   private:
     bool manual;
     bool active;
@@ -30,7 +27,6 @@ class Valve {
     short timerMinute;
     int duration;
     bool* days;
-    bool changed;
 };
 
 #endif /* XT_VALVE_TIMER_VALVE_H */

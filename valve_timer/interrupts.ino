@@ -33,6 +33,7 @@ void onNextRise() {
     }
   } else {
     stateMachine[NAV_PTR[0]][NAV_PTR[1]](settings, valves, NAV_PTR, 1);
+    update = true;
   }
 
   refresh = true;
@@ -50,6 +51,7 @@ void onPrevRise() {
     }
   } else {
     stateMachine[NAV_PTR[0]][NAV_PTR[1]](settings, valves, NAV_PTR, -1);
+    update = true;
   }
 
   refresh = true;

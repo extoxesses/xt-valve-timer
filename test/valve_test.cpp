@@ -32,4 +32,5 @@ void testValveActive() {
 
 int main() {
   testValveManual();
+  testValveActive();
 }

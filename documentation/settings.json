@@ -1,0 +1,71 @@
+{
+    "settings": {
+      "contrast": 47
+    },
+    "valves": [
+      {
+        "id": 0,
+        "manual": true,
+        "timerHour": 20,
+        "timerMinute": 30,
+        "duration": 15,
+        "days": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ]
+      },
+      {
+        "id": 1,
+        "manual": true,
+        "timerHour": 20,
+        "timerMinute": 30,
+        "duration": 15,
+        "days": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ]
+      },
+      {
+        "id": 2,
+        "manual": true,
+        "timerHour": 20,
+        "timerMinute": 30,
+        "duration": 15,
+        "days": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ]
+      },
+      {
+        "id": 3,
+        "manual": true,
+        "timerHour": 20,
+        "timerMinute": 30,
+        "duration": 15,
+        "days": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ]
+      }
+    ]
+  }

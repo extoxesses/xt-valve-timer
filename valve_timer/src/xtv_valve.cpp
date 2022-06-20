@@ -19,7 +19,6 @@ bool Valve::isManual() {
 
 void Valve::setManual(bool manual) {
   this->manual = manual;
-  changed = true;
 }
 
 bool Valve::isActive() {
@@ -28,7 +27,6 @@ bool Valve::isActive() {
 
 void Valve::setActive(bool active) {
   this->active = active;
-  changed = true;
 }
 
 short Valve::getTimerHour() {
@@ -45,7 +43,6 @@ short Valve::getTimerMinute() {
 
 void Valve::setTimerMinute(short timerMinute) {
   this->timerMinute = timerMinute;
-  changed = true;
 }
 
 int Valve::getDuration() {
@@ -54,7 +51,6 @@ int Valve::getDuration() {
 
 void Valve::setDuration(int duration) {
   this->duration = duration;
-  changed = true;
 }
 
 bool Valve::getDay(int idx) {
@@ -64,14 +60,5 @@ bool Valve::getDay(int idx) {
 void Valve::setDay(int idx, bool state) {
   if (idx < WEEK_SIZE) {
     days[idx] = state;
-    changed = true;
   }
-}
-
-bool Valve::isChanged() {
-  return changed;
-}
-
-void Valve::setChanged() {
-  this->changed = false;
 }
