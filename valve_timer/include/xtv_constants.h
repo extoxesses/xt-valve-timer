@@ -30,6 +30,6 @@ const short DEBUG_PIN = 23;
 const short RELAY_START_PIN = 30;
 
 // Static configurations
-const short JSON_SIZE = 512;
+const short JSON_SIZE = 1024;
 
 #endif /* XT_VALVE_TIMER_CONST_H */

@@ -21,7 +21,7 @@ class XtvSdManager {
     void toJson(String& json, XtvSettings& settings, Valve* valves, short size);
     void serializeSettings(StaticJsonDocument<JSON_SIZE>& document, XtvSettings& settings);
     void serializeValve(JsonArray& valvesArray, Valve& valve, short id);
-    void deserializeValves(DynamicJsonDocument& document, Valve* valves, short size);
+    void deserializeValves(StaticJsonDocument<JSON_SIZE>& document, Valve* valves, short size);
     void deserializeValve(JsonObject& jsonValve, Valve& valve);
 
 };

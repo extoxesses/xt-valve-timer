@@ -40,9 +40,9 @@ void setup() {
   // Init SD card
   sdManager.initSD();
   do {
-    update = sdManager.loadSettings(settings, valves, MAX_VALVES);
+    update = !sdManager.loadSettings(settings, valves, MAX_VALVES);
     delay(500);
-  } while(!update);
+  } while(update);
   
   // Wait system to be stable, and run with start configuration
   delay(1000);

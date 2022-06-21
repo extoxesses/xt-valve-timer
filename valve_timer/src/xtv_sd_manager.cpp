@@ -18,8 +18,8 @@ bool XtvSdManager::saveSettings(XtvSettings& settings, Valve* valves, short size
   bool status = false;
   
   // Note: not move file name into a constant! Process doesn't work properly
-  SD.remove("settings.json");
-  File file = SD.open("settings.json", FILE_WRITE);
+  SD.remove("settings.txt");
+  File file = SD.open("settings.txt", FILE_WRITE);
 
   if (file) {
     XtvUtils::info("File correctly opened. Writing json...");
@@ -49,12 +49,11 @@ bool XtvSdManager::loadSettings(XtvSettings& settings, Valve* valves, short size
     return false;
   }
   
-  Serial.println("sono dentro!");
   String json = file.readString();
-  DynamicJsonDocument document(JSON_SIZE);
+  StaticJsonDocument<2048> document;
   deserializeJson(document, json);
-  
-  settings.setContrast(document["contrast"].as<int>());
+
+  settings.setContrast(document["settings"]["contrast"].as<int>());
   deserializeValves(document, valves, size);
   file.close();
   
@@ -97,9 +96,9 @@ void XtvSdManager::serializeValve(JsonArray& valvesArray, Valve& valve, short id
   }
 }
 
-void XtvSdManager::deserializeValves(DynamicJsonDocument& document, Valve* valves, short size) {
+void XtvSdManager::deserializeValves(StaticJsonDocument<JSON_SIZE>& document, Valve* valves, short size) {
   for (int i = 0; i < size; ++i) {
-    JsonObject jsonValve = document["valves"][i].to<JsonObject>();
+    JsonObject jsonValve = document["valves"][i].as<JsonObject>();
     short id = jsonValve["id"].as<int>();
     deserializeValve(jsonValve, valves[id]);
   }
@@ -107,8 +106,6 @@ void XtvSdManager::deserializeValves(DynamicJsonDocument& document, Valve* valve
 
 void XtvSdManager::deserializeValve(JsonObject& jsonValve, Valve& valve) {
   valve.setManual(jsonValve["manual"].as<bool>());
-  Serial.println(jsonValve["manual"].as<bool>());
-  Serial.println(valve.isManual());
 
   valve.setActive(false);
   valve.setTimerHour(jsonValve["timerHour"].as<int>());
