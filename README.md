@@ -18,7 +18,7 @@ Alternative device: Adafruit PCD8544
   7. SCK
   8. VDD
 
-## Mega2560 + WiFi R3 ATmega2560 + Setup ESP8266  
+## Mega2560 + WiFi R3 ATmega2560 + Setup ESP8266
 
 Action | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | RXD/TXD |
 --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |

@@ -27,7 +27,8 @@ const short PREV_BTN_PIN = 21;
 const short HW_SWITCH_PIN = 22;
 const short DEBUG_PIN = 23;
 
-const short RELAY_START_PIN = 30;
+const short RELAY_VALVE_START_PIN = 30;
+const short RELAY_SUPPLY_START_PIN = 40;
 
 // Static configurations
 const short JSON_SIZE = 1024;

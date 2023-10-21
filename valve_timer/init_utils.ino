@@ -7,11 +7,17 @@ void initDisplay(Adafruit_PCD8544& lcd, short contrast) {
 void initGPIO() {
   // Debug
   pinMode(DEBUG_PIN, INPUT);
+  
   // Relay
   for(short i = 0; i < MAX_VALVES; ++i) {
-    pinMode(RELAY_START_PIN + i, OUTPUT);
-    digitalWrite(RELAY_START_PIN + i, LOW);
+    pinMode(RELAY_VALVE_START_PIN + i, OUTPUT);
+    digitalWrite(RELAY_VALVE_START_PIN + i, LOW);
   }
+  for(short i = 0; i < 2; ++i) {
+    pinMode(RELAY_SUPPLY_START_PIN + i, OUTPUT);
+    digitalWrite(RELAY_SUPPLY_START_PIN + i, LOW);
+  }
+
   // Interrupts
   short mode = FALLING;
   attachInterrupt(digitalPinToInterrupt(ENTER_BTN_PIN),  onEnterRise,  mode);

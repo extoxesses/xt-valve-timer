@@ -21,12 +21,12 @@ class XtvUtils {
           // If "now" is in a scheduled range, open relay only if closed
           if(!valves[i].isActive()) {
             valves[i].setActive(true);
-            digitalWrite(RELAY_START_PIN + i, HIGH);
+            digitalWrite(RELAY_VALVE_START_PIN + i, HIGH);
           }
         } else if (valves[i].isActive()) {
           // If "now" isn't in a scheduled range, close relay only if it is open
           valves[i].setActive(false);
-          digitalWrite(RELAY_START_PIN + i, LOW);
+          digitalWrite(RELAY_VALVE_START_PIN + i, LOW);
         }
       }
     }
